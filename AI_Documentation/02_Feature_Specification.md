@@ -3,63 +3,62 @@
 ## 1. Todo List (CRUD)
 
 ### Create
-- Input field with "Add" button or Enter key
-- Optional priority level (low / medium / high)
+- Text input + Add button (or Enter key)
+- Optional priority: Low / Medium / High (color-coded)
 
 ### Read
-- Scrollable list of all tasks
-- Visual distinction between active, completed, and in-progress tasks
-- Current/active task highlighted with a glow/pulse animation
+- Scrollable list with visual distinction: active, pending, completed
+- Active/current task highlighted with animated glow (DropShadowEffect + Storyboard)
 
 ### Update
-- Inline editing on double-click
-- Toggle completion status (checkbox)
-- Change priority level
+- Double-click to inline edit task text
+- Toggle completion via checkbox
+- Cycle priority via click on priority indicator
 
 ### Delete
-- Delete button per task (with confirmation or undo toast)
-- Bulk clear completed tasks
+- Per-task delete button
+- "Clear completed" bulk action
 
-### Visual Effects for Current Task
-- Pulsing glow border (CSS `box-shadow` animation) on the active task
-- Subtle scale-up animation when a task becomes active
-- Color-coded priority indicators (green/yellow/red)
-- Smooth enter/exit transitions using CSS transitions
+### Visual Effects
+- Active task: pulsing glow border via DropShadowEffect with DoubleAnimation on Opacity/BlurRadius
+- New task: SlideIn animation (TranslateTransform + OpacityAnimation)
+- Completed task: FadeOut + Strikethrough
+- Priority dots: Green (low), Yellow (medium), Red (high)
 
 ## 2. Pomodoro Timer
 
-### Core Functionality
-- Configurable work period (default: 25 min)
-- Configurable rest/break period (default: 5 min)
-- Configurable total task duration (end time)
-- Start / Pause / Reset controls
-- Auto-switch between work and rest phases
+### Configuration
+- Work duration (default 25 min)
+- Rest/break duration (default 5 min)
+- Total task time limit (end time for the session)
 
-### Timer Display
-- Circular progress ring (SVG or CSS conic-gradient)
-- Digital countdown (MM:SS)
-- Phase indicator (WORK / REST)
-- Session counter (e.g., "Pomodoro 3/8")
+### Display
+- Circular progress arc (WPF Arc geometry or ProgressBar with custom template)
+- Digital countdown MM:SS
+- Phase label: WORK / REST / IDLE
+- Session counter: "Pomodoro 3 of 8"
+
+### Controls
+- Start / Pause / Reset buttons
+- Auto-switch between work ↔ rest phases
+- Stop when total time limit reached
 
 ### Task Integration
-- Link a pomodoro session to a specific todo task
-- Auto-highlight the linked task during work phase
-- Track total pomodoro sessions per task
+- Link timer to a specific todo item
+- Linked task gets the glow highlight during work phase
+- Track pomodoro count per task
 
 ### Notifications
-- System notification when work/rest phase ends (via Tauri notification plugin)
-- Optional sound alert
+- System tray balloon notification on phase change
+- Optional audio beep via SystemSounds
 
-## 3. Widget Behavior
+## 3. Widget Window Behavior
 
-### Window Properties
-- Frameless, always-on-top window
-- Draggable title bar area
-- Resizable with min/max constraints
-- System tray icon with quick actions (show/hide, start/pause timer)
-- Transparent/semi-transparent background option
-
-### Layout
-- Compact mode: timer only (small floating widget)
-- Expanded mode: timer + todo list
-- Toggle between modes via button or tray menu
+- Frameless window (WindowStyle=None, AllowsTransparency=True)
+- Custom title bar with drag support (DragMove)
+- Always-on-top (Topmost=True)
+- Compact mode (timer only) / Expanded mode (timer + todo list)
+- System tray icon (NotifyIcon) with context menu
+- Minimize to tray
+- Remember window position between sessions
+- Semi-transparent dark background with rounded corners

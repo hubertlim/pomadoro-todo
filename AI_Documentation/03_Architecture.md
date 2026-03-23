@@ -1,78 +1,63 @@
 # Architecture Overview
 
-## High-Level Architecture
+## Pattern: MVVM (Model-View-ViewModel)
 
 ```
-┌─────────────────────────────────────────┐
-│              Tauri v2 Shell             │
-│  ┌───────────────────────────────────┐  │
-│  │         Rust Backend              │  │
-│  │  - Window management              │  │
-│  │  - System tray                    │  │
-│  │  - Notifications                  │  │
-│  │  - Data persistence (store)       │  │
-│  └──────────────┬────────────────────┘  │
-│                 │ IPC (invoke/listen)    │
-│  ┌──────────────▼────────────────────┐  │
-│  │     WebView2 (Windows)            │  │
-│  │  ┌─────────────────────────────┐  │  │
-│  │  │    SolidJS Frontend         │  │  │
-│  │  │  ┌───────┐  ┌───────────┐  │  │  │
-│  │  │  │ Todo  │  │ Pomodoro  │  │  │  │
-│  │  │  │ CRUD  │  │  Timer    │  │  │  │
-│  │  │  └───────┘  └───────────┘  │  │  │
-│  │  │  ┌─────────────────────┐   │  │  │
-│  │  │  │   Shared State      │   │  │  │
-│  │  │  │  (SolidJS Signals)  │   │  │  │
-│  │  │  └─────────────────────┘   │  │  │
-│  │  └─────────────────────────────┘  │  │
-│  └───────────────────────────────────┘  │
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│            WPF Application               │
+│                                          │
+│  ┌─────────┐  Binding  ┌─────────────┐  │
+│  │  Views   │◄────────►│ ViewModels   │  │
+│  │  (XAML)  │          │  (C#)        │  │
+│  └─────────┘          └──────┬──────┘  │
+│                               │         │
+│                        ┌──────▼──────┐  │
+│                        │   Models     │  │
+│                        │   + Services │  │
+│                        └─────────────┘  │
+└──────────────────────────────────────────┘
 ```
 
 ## Project Structure
 
 ```
-pomodoro-widget/
-├── src/                      # SolidJS frontend
-│   ├── components/
-│   │   ├── TodoList.tsx      # Todo CRUD component
-│   │   ├── TodoItem.tsx      # Single todo item with effects
-│   │   ├── PomodoroTimer.tsx # Timer with circular progress
-│   │   ├── TimerSettings.tsx # Work/rest/total time config
-│   │   └── TitleBar.tsx      # Custom frameless title bar
-│   ├── stores/
-│   │   ├── todoStore.ts      # Todo state management (signals)
-│   │   └── timerStore.ts     # Timer state management (signals)
-│   ├── styles/
-│   │   ├── global.css        # Base styles, CSS variables
-│   │   ├── animations.css    # Glow, pulse, transitions
-│   │   └── components/       # Per-component CSS modules
-│   ├── App.tsx               # Root component
-│   └── index.tsx             # Entry point
-├── src-tauri/                # Rust backend
-│   ├── src/
-│   │   ├── main.rs           # Tauri app setup
-│   │   ├── tray.rs           # System tray logic
-│   │   └── commands.rs       # IPC commands
-│   ├── Cargo.toml
-│   └── tauri.conf.json       # Tauri configuration
-├── index.html
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── AI_Documentation/         # This folder
+PomodoroWidget/
+├── PomodoroWidget.sln
+├── PomodoroWidget/
+│   ├── PomodoroWidget.csproj
+│   ├── App.xaml / App.xaml.cs
+│   ├── Models/
+│   │   ├── TodoItem.cs
+│   │   └── TimerSettings.cs
+│   ├── ViewModels/
+│   │   ├── ViewModelBase.cs        # INotifyPropertyChanged base
+│   │   ├── MainViewModel.cs        # Root VM, orchestrates sub-VMs
+│   │   ├── TodoViewModel.cs        # Todo CRUD logic
+│   │   └── TimerViewModel.cs       # Pomodoro countdown logic
+│   ├── Views/
+│   │   ├── MainWindow.xaml         # Frameless widget shell
+│   │   ├── TodoListView.xaml       # Todo list UserControl
+│   │   ├── TodoItemView.xaml       # Single item template
+│   │   ├── TimerView.xaml          # Circular timer UserControl
+│   │   └── TimerSettingsView.xaml  # Work/rest/total config
+│   ├── Services/
+│   │   ├── DataService.cs          # JSON persistence (AppData)
+│   │   └── NotificationService.cs  # Tray balloon + sound
+│   ├── Converters/
+│   │   └── PriorityToColorConverter.cs
+│   ├── Styles/
+│   │   ├── Theme.xaml              # Colors, brushes, base styles
+│   │   └── Animations.xaml         # Storyboards, triggers
+│   └── Assets/
+│       └── icon.ico
+└── AI_Documentation/
 ```
 
-## State Management
+## Key Design Decisions
 
-Using SolidJS signals (built-in reactivity, no external lib needed):
-
-- `todoStore`: `createSignal` / `createStore` for todo list array
-- `timerStore`: signals for countdown, phase, settings, linked task
-- Persistence: serialize to Tauri store on every state change
-
-## IPC Communication
-
-- Frontend → Rust: `invoke("command_name", { args })` for system-level ops
-- Rust → Frontend: `emit("event_name", payload)` for tray actions, notifications
+1. Single-window app: one `MainWindow` with `UserControl` panels
+2. `DispatcherTimer` for the pomodoro countdown (UI-thread safe)
+3. JSON file persistence via `System.Text.Json` in `%AppData%/PomodoroWidget/`
+4. `System.Windows.Forms.NotifyIcon` for system tray (WPF has no built-in tray)
+5. All animations in XAML Storyboards — no code-behind animation logic
+6. `RelayCommand` (ICommand) for button bindings

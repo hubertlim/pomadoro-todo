@@ -1,81 +1,92 @@
-# Visual Effects Guide
+# Visual Effects Guide (WPF)
 
-## Task Highlight Effects
+## Active Task Glow Effect
 
-### Active Task Glow
-```css
-@keyframes task-glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.4); }
-  50%      { box-shadow: 0 0 20px rgba(99, 102, 241, 0.8), 0 0 40px rgba(99, 102, 241, 0.3); }
-}
+Uses `DropShadowEffect` with animated `Opacity` and `BlurRadius`:
 
-.task-active {
-  animation: task-glow 2s ease-in-out infinite;
-  border: 1px solid rgba(99, 102, 241, 0.6);
-}
+```xml
+<Style x:Key="ActiveTaskStyle" TargetType="Border">
+  <Setter Property="Effect">
+    <Setter.Value>
+      <DropShadowEffect ShadowDepth="0" Color="#6366F1"
+                        BlurRadius="15" Opacity="0"/>
+    </Setter.Value>
+  </Setter>
+  <Style.Triggers>
+    <DataTrigger Binding="{Binding IsActive}" Value="True">
+      <DataTrigger.EnterActions>
+        <BeginStoryboard>
+          <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+            <DoubleAnimation
+              Storyboard.TargetProperty="(Effect).(DropShadowEffect.Opacity)"
+              From="0.4" To="0.9" Duration="0:0:1"/>
+            <DoubleAnimation
+              Storyboard.TargetProperty="(Effect).(DropShadowEffect.BlurRadius)"
+              From="10" To="25" Duration="0:0:1"/>
+          </Storyboard>
+        </BeginStoryboard>
+      </DataTrigger.EnterActions>
+    </DataTrigger>
+  </Style.Triggers>
+</Style>
 ```
 
-### Task Enter/Exit Transitions
-```css
-.task-enter {
-  animation: slideIn 0.3s ease-out forwards;
-}
+## Task Enter Animation
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.task-exit {
-  animation: slideOut 0.3s ease-in forwards;
-}
-
-@keyframes slideOut {
-  from { opacity: 1; transform: translateX(0); }
-  to   { opacity: 0; transform: translateX(100px); }
-}
+```xml
+<Storyboard x:Key="SlideInStoryboard">
+  <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                   From="0" To="1" Duration="0:0:0.25"/>
+  <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                   From="-10" To="0" Duration="0:0:0.25">
+    <DoubleAnimation.EasingFunction>
+      <CubicEase EasingMode="EaseOut"/>
+    </DoubleAnimation.EasingFunction>
+  </DoubleAnimation>
+</Storyboard>
 ```
 
-### Priority Color Indicators
-```css
-:root {
-  --priority-low: #22c55e;     /* green */
-  --priority-medium: #eab308;  /* yellow */
-  --priority-high: #ef4444;    /* red */
-}
+## Circular Timer Progress
+
+WPF `Arc` via `Path` with `ArcSegment`, animated `stroke-dashoffset` equivalent:
+
+```xml
+<Path Stroke="#6366F1" StrokeThickness="6" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+  <Path.Data>
+    <PathGeometry>
+      <PathFigure StartPoint="{Binding ArcStart}">
+        <ArcSegment Point="{Binding ArcEnd}"
+                    Size="54,54"
+                    IsLargeArc="{Binding IsLargeArc}"
+                    SweepDirection="Clockwise"/>
+      </PathFigure>
+    </PathGeometry>
+  </Path.Data>
+</Path>
 ```
 
-## Pomodoro Timer Effects
+Progress is driven by the ViewModel computing arc start/end points based on remaining time.
 
-### Circular Progress Ring (SVG approach)
-- SVG circle with `stroke-dasharray` and `stroke-dashoffset`
-- Animate `stroke-dashoffset` based on remaining time
-- Color transitions: work phase (indigo) → rest phase (emerald)
+## Widget Background (Glassmorphism-like)
 
-### Phase Transition
-```css
-@keyframes phase-switch {
-  0%   { transform: scale(1); filter: brightness(1); }
-  50%  { transform: scale(1.05); filter: brightness(1.3); }
-  100% { transform: scale(1); filter: brightness(1); }
-}
+```xml
+<Border Background="#E60F0F19" CornerRadius="16"
+        BorderBrush="#10FFFFFF" BorderThickness="1">
+  <!-- Content -->
+</Border>
 ```
 
-## Widget Window Effects
+## Priority Color Indicators
 
-### Glassmorphism Background
-```css
-.widget-container {
-  background: rgba(15, 15, 25, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-}
+```xml
+<SolidColorBrush x:Key="PriorityLow" Color="#22C55E"/>
+<SolidColorBrush x:Key="PriorityMedium" Color="#EAB308"/>
+<SolidColorBrush x:Key="PriorityHigh" Color="#EF4444"/>
 ```
 
 ## Performance Notes
 
-- All animations use `transform` and `opacity` only (GPU-composited, no layout thrashing)
-- Use `will-change: transform` sparingly on animated elements
-- Prefer CSS animations over JS-driven animations for widget-level effects
-- `requestAnimationFrame` only for the timer countdown display update
+- WPF animations run on the composition thread (GPU-accelerated)
+- `DropShadowEffect` is bitmap-cached automatically
+- Use `CacheMode="BitmapCache"` on animated elements for extra smoothness
+- `DispatcherTimer` at 1s interval for countdown — negligible CPU

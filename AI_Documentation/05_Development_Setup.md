@@ -2,91 +2,63 @@
 
 ## Prerequisites
 
-### 1. Node.js (v18+)
-```bash
-# Verify installation
-node --version
-npm --version
-```
+Only one thing needed: .NET SDK (9.0+)
 
-### 2. Rust Toolchain
 ```bash
-# Install via rustup (https://rustup.rs)
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
 # Verify
-rustc --version
-cargo --version
+dotnet --version   # Should show 9.x
 ```
 
-### 3. Windows Build Dependencies
-- Microsoft Visual Studio C++ Build Tools (MSVC)
-- WebView2 Runtime (pre-installed on Windows 10 1803+ and Windows 11)
-- Install via Visual Studio Installer → "Desktop development with C++"
+That's it. No other tools, runtimes, or package managers required.
 
-### 4. Tauri CLI
-```bash
-npm install -g @tauri-apps/cli@latest
-```
-
-## Project Initialization
+## Project Creation
 
 ```bash
-# Create project with Tauri + SolidJS template
-npm create tauri-app@latest pomodoro-widget -- --template template-solid-ts
-
-# Navigate to project
-cd pomodoro-widget
-
-# Install dependencies
-npm install
-
-# Install Tauri plugins
-npm install @tauri-apps/plugin-store @tauri-apps/plugin-notification
-```
-
-### Cargo dependencies (src-tauri/Cargo.toml)
-```toml
-[dependencies]
-tauri = { version = "2", features = ["tray-icon"] }
-tauri-plugin-store = "2"
-tauri-plugin-notification = "2"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+dotnet new wpf -n PomodoroWidget -o PomodoroWidget
+dotnet new sln -n PomodoroWidget -o .
+dotnet sln add PomodoroWidget/PomodoroWidget.csproj
 ```
 
 ## Development Commands
 
 ```bash
-# Start dev server with hot reload
-npm run tauri dev
+# Run in debug mode
+dotnet run --project PomodoroWidget
 
-# Build production binary
-npm run tauri build
+# Build release
+dotnet build -c Release
 
-# Check Rust code
-cargo check --manifest-path src-tauri/Cargo.toml
+# Publish as single portable EXE (self-contained, no .NET install needed)
+dotnet publish PomodoroWidget -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true
+
+# Publish as small EXE (requires .NET on target machine)
+dotnet publish PomodoroWidget -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true
 ```
 
-## Tauri Configuration Highlights (tauri.conf.json)
+## Project File Configuration
 
-```json
-{
-  "app": {
-    "windows": [
-      {
-        "title": "Pomodoro Widget",
-        "width": 380,
-        "height": 600,
-        "decorations": false,
-        "alwaysOnTop": true,
-        "transparent": true,
-        "resizable": true,
-        "minWidth": 300,
-        "minHeight": 400
-      }
-    ],
-    "withGlobalTauri": true
-  }
-}
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>  <!-- For NotifyIcon tray -->
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+  </PropertyGroup>
+</Project>
 ```
+
+Note: `UseWindowsForms=true` is only for `System.Windows.Forms.NotifyIcon` (tray icon).
+WPF has no built-in system tray control.
+
+## Folder Setup
+
+After project creation, add these folders:
+- `Models/`
+- `ViewModels/`
+- `Views/`
+- `Services/`
+- `Converters/`
+- `Styles/`
+- `Assets/`

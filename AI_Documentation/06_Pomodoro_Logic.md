@@ -1,51 +1,72 @@
 # Pomodoro Timer Logic
 
-## Core Algorithm
+## Core State Machine
 
 ```
-STATE: { phase: WORK|REST, remaining: seconds, session: number, totalElapsed: seconds }
+States: IDLE → WORK → REST → WORK → REST → ... → DONE
 
-on START:
-  set phase = WORK
-  set remaining = workDuration
-  start interval (1s tick)
+IDLE:  Timer not started. Shows configured work duration.
+WORK:  Counting down workDuration. Active task glows.
+REST:  Counting down restDuration. Glow paused.
+DONE:  Total time limit reached. Timer stops.
+```
 
-on TICK:
-  remaining -= 1
-  totalElapsed += 1
-  if remaining <= 0:
-    if phase == WORK:
-      session += 1
-      notify("Work phase complete!")
-      set phase = REST
-      set remaining = restDuration
-    else:
-      notify("Break over! Back to work.")
-      set phase = WORK
-      set remaining = workDuration
-  if totalElapsed >= totalTaskDuration:
-    stop timer
-    notify("Task time is up!")
+## Algorithm (C# DispatcherTimer)
+
+```csharp
+// On each 1-second tick:
+Remaining--;
+TotalElapsed++;
+
+if (Remaining <= 0)
+{
+    if (Phase == Phase.Work)
+    {
+        SessionCount++;
+        Phase = Phase.Rest;
+        Remaining = RestDuration;
+        NotifyPhaseChange("Work complete! Take a break.");
+    }
+    else
+    {
+        Phase = Phase.Work;
+        Remaining = WorkDuration;
+        NotifyPhaseChange("Break over! Focus time.");
+    }
+}
+
+if (TotalElapsed >= TotalDuration)
+{
+    Stop();
+    NotifyPhaseChange("Task time is up!");
+}
 ```
 
 ## Configurable Parameters
 
-| Parameter       | Default | Description                          |
-|----------------|---------|--------------------------------------|
-| workDuration   | 25 min  | Focus/work interval length           |
-| restDuration   | 5 min   | Break interval length                |
-| totalDuration  | 2 hours | Total time allocated for the task    |
+| Parameter     | Default | Range     | Description                    |
+|--------------|---------|-----------|--------------------------------|
+| WorkDuration | 25 min  | 1–120 min | Focus interval                 |
+| RestDuration | 5 min   | 1–60 min  | Break interval                 |
+| TotalDuration| 120 min | 1–480 min | Total allocated time for task  |
 
 ## Session Calculation
 
 ```
-maxSessions = floor(totalDuration / (workDuration + restDuration))
+MaxSessions = Floor(TotalDuration / (WorkDuration + RestDuration))
 ```
 
-Example: 2h total, 25min work, 5min rest → 4 full pomodoro cycles
+Example: 120min total, 25min work, 5min rest → 4 full pomodoro cycles
 
 ## Task Linking
 
-- Each todo item can have an optional `linkedTimerId`
-- When a pomodoro starts for a task, that task gets the `active` CSS class
-- Session count is stored per task for productivity tracking
+- `TimerViewModel.LinkedTaskId` binds to a `TodoItem.Id`
+- When timer is in WORK phase, `TodoItem.IsActive = true` → triggers glow
+- On each completed work phase, `TodoItem.PomodoroCount++`
+- Unlinking clears the glow
+
+## Persistence
+
+Timer settings saved to `%AppData%/PomodoroWidget/settings.json`
+Todo list saved to `%AppData%/PomodoroWidget/todos.json`
+Window position saved to `%AppData%/PomodoroWidget/window.json`
