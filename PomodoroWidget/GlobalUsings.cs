@@ -1,0 +1,9 @@
+global using Application = System.Windows.Application;
+global using UserControl = System.Windows.Controls.UserControl;
+global using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+global using MessageBox = System.Windows.MessageBox;
+global using Color = System.Windows.Media.Color;
+global using Brushes = System.Windows.Media.Brushes;
+global using Point = System.Windows.Point;
+global using Size = System.Windows.Size;
+global using TextBox = System.Windows.Controls.TextBox;
