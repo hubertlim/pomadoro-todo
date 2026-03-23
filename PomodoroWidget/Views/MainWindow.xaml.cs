@@ -16,6 +16,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         Loaded += OnLoaded;
         Closing += OnClosing;
+        LocationChanged += (_, _) => VM.UpdatePosition(Left, Top);
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -24,6 +25,7 @@ public partial class MainWindow : Window
         var screen = SystemParameters.WorkArea;
         Left = Math.Clamp(left, 0, screen.Width - 100);
         Top = Math.Clamp(top, 0, screen.Height - 100);
+        VM.UpdatePosition(Left, Top);
 
         _tray = new TrayService(this, VM);
     }
@@ -33,7 +35,6 @@ public partial class MainWindow : Window
         VM.Save(Left, Top);
         if (!_forceClose)
         {
-            // Minimize to tray instead of closing
             e.Cancel = true;
             Hide();
             return;
@@ -46,16 +47,45 @@ public partial class MainWindow : Window
         if (e.ClickCount == 1) DragMove();
     }
 
-    private void CloseButton_Click(object sender, RoutedEventArgs e)
-    {
-        // Minimize to tray
-        Hide();
-    }
+    private void CloseButton_Click(object sender, RoutedEventArgs e) => Hide();
 
-    /// <summary>Called from tray "Exit" to truly close the app.</summary>
     public void ForceClose()
     {
         _forceClose = true;
         Close();
+    }
+
+    // Keyboard shortcuts
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        // Ctrl+Space: toggle start/pause
+        if (e.Key == Key.Space && Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            if (VM.Timer.IsRunning)
+                VM.Timer.PauseCommand.Execute(null);
+            else
+                VM.Timer.StartCommand.Execute(null);
+            e.Handled = true;
+        }
+        // Ctrl+R: reset timer
+        else if (e.Key == Key.R && Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            VM.Timer.ResetCommand.Execute(null);
+            e.Handled = true;
+        }
+        // Ctrl+E: toggle expand
+        else if (e.Key == Key.E && Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            VM.ToggleExpandCommand.Execute(null);
+            e.Handled = true;
+        }
+        // Escape: minimize to tray
+        else if (e.Key == Key.Escape)
+        {
+            Hide();
+            e.Handled = true;
+        }
     }
 }

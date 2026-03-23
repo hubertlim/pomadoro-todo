@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using System.Windows.Threading;
 using PomodoroWidget.Models;
 using PomodoroWidget.Services;
 
@@ -9,11 +10,15 @@ public class MainViewModel : ViewModelBase
     public TodoViewModel Todo { get; } = new();
     public TimerViewModel Timer { get; } = new();
 
+    // Auto-save: debounced 3-second timer
+    private readonly DispatcherTimer _autoSave;
+    private double _lastLeft, _lastTop;
+
     private bool _isExpanded = true;
     public bool IsExpanded
     {
         get => _isExpanded;
-        set => SetProperty(ref _isExpanded, value);
+        set { if (SetProperty(ref _isExpanded, value)) ScheduleSave(); }
     }
 
     public ICommand ToggleExpandCommand { get; }
@@ -22,23 +27,42 @@ public class MainViewModel : ViewModelBase
     {
         ToggleExpandCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
 
-        Timer.WorkPhaseCompleted += () => Todo.IncrementLinkedPomodoro();
+        _autoSave = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+        _autoSave.Tick += (_, _) => { _autoSave.Stop(); Save(_lastLeft, _lastTop); };
+
+        Timer.WorkPhaseCompleted += () => { Todo.IncrementLinkedPomodoro(); ScheduleSave(); };
         Timer.PhaseChanged += phase =>
         {
             if (Todo.LinkedTask != null)
                 Todo.LinkedTask.IsActive = phase == Phase.Work;
 
             var msg = phase == Phase.Work ? "Break over! Focus time." : "Work complete! Take a break.";
-            Services.NotificationService.NotifyPhaseChange(msg);
+            NotificationService.NotifyPhaseChange(msg);
         };
         Timer.TimerFinished += () =>
         {
             if (Todo.LinkedTask != null)
                 Todo.LinkedTask.IsActive = false;
-            Services.NotificationService.NotifyPhaseChange("Task time is up!");
+            NotificationService.NotifyPhaseChange("Task time is up!");
+            ScheduleSave();
         };
 
+        // Listen for todo changes
+        Todo.Todos.CollectionChanged += (_, _) => ScheduleSave();
+
         Load();
+    }
+
+    public void ScheduleSave()
+    {
+        _autoSave.Stop();
+        _autoSave.Start(); // resets the 3s debounce
+    }
+
+    public void UpdatePosition(double left, double top)
+    {
+        _lastLeft = left;
+        _lastTop = top;
     }
 
     public void Load()
@@ -53,6 +77,8 @@ public class MainViewModel : ViewModelBase
 
     public void Save(double left, double top)
     {
+        _lastLeft = left;
+        _lastTop = top;
         DataService.Save(new AppData
         {
             Todos = Todo.ToModels(),

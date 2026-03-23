@@ -11,7 +11,9 @@ A minimalistic, native Windows desktop widget combining a todo list with a Pomod
 - Desktop widget — frameless, always-on-top, draggable, semi-transparent window
 - System tray — minimize to tray, quick actions via context menu
 - Compact / expanded mode — toggle between timer-only and full view
-- Portable — publishes as a single `.exe`, zero install required
+- Portable — publishes as a single `.exe` (~71MB self-contained), zero install required
+- Auto-save — debounced persistence on every change, crash-safe
+- Keyboard shortcuts — Ctrl+Space start/pause, Ctrl+R reset, Ctrl+E toggle, Esc minimize
 
 ## Tech Stack
 
@@ -35,9 +37,21 @@ That's it. Nothing else to install.
 # Run in development
 dotnet run --project PomodoroWidget
 
-# Publish portable single-file EXE
-dotnet publish PomodoroWidget -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
+# Publish portable single-file EXE (self-contained, ~71MB)
+dotnet publish PomodoroWidget -c Release
+
+# Publish framework-dependent (requires .NET on target, ~200KB)
+dotnet publish PomodoroWidget -c Release --self-contained false
 ```
+
+## Keyboard Shortcuts
+
+| Shortcut      | Action              |
+|---------------|---------------------|
+| Ctrl+Space    | Start / Pause timer |
+| Ctrl+R        | Reset timer         |
+| Ctrl+E        | Toggle todo list    |
+| Esc           | Minimize to tray    |
 
 ## Project Structure
 

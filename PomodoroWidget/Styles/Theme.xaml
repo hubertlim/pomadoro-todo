@@ -52,7 +52,7 @@
         </Style.Triggers>
     </Style>
 
-    <!-- TextBox style -->
+    <!-- TextBox style with placeholder -->
     <Style x:Key="WidgetTextBox" TargetType="TextBox">
         <Setter Property="Background" Value="{StaticResource BgInputBrush}"/>
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
@@ -68,12 +68,28 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="6">
-                        <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
+                        <Grid>
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
+                            <TextBlock x:Name="Placeholder"
+                                       Text="{TemplateBinding Tag}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Opacity="0.5"
+                                       Margin="10,7,0,0"
+                                       IsHitTestVisible="False"
+                                       Visibility="Collapsed"/>
+                        </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsFocused" Value="True">
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
                         </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Text" Value=""/>
+                                <Condition Property="IsFocused" Value="False"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                        </MultiTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
