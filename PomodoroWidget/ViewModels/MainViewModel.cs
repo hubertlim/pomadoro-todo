@@ -27,11 +27,15 @@ public class MainViewModel : ViewModelBase
         {
             if (Todo.LinkedTask != null)
                 Todo.LinkedTask.IsActive = phase == Phase.Work;
+
+            var msg = phase == Phase.Work ? "Break over! Focus time." : "Work complete! Take a break.";
+            Services.NotificationService.NotifyPhaseChange(msg);
         };
         Timer.TimerFinished += () =>
         {
             if (Todo.LinkedTask != null)
                 Todo.LinkedTask.IsActive = false;
+            Services.NotificationService.NotifyPhaseChange("Task time is up!");
         };
 
         Load();
