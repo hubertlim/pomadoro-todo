@@ -1,0 +1,84 @@
+<UserControl x:Class="PomodoroWidget.Views.FocusView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Margin="14,8,14,14">
+        <Border Style="{StaticResource PanelCard}" VerticalAlignment="Top">
+            <StackPanel>
+                <TextBlock Text="Focus now"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           FontSize="18" FontWeight="SemiBold"/>
+                <TextBlock Text="Use the timer above for this task. Finish it, switch task, or return to the plan."
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           FontSize="12"
+                           TextWrapping="Wrap"
+                           Margin="0,4,0,14"/>
+
+                <Border Background="{StaticResource AccentSoftBrush}"
+                        BorderBrush="{StaticResource AccentBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="12"
+                        Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="Current task"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10"/>
+                        <TextBlock Text="{Binding Todo.LinkedTaskText}"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="{Binding PlanCapacityText}"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           FontSize="12"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,12"/>
+
+                <Border Background="{StaticResource BgInputBrush}"
+                        BorderBrush="{StaticResource HairlineBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="10"
+                        Margin="0,0,0,12">
+                    <TextBlock Text="Shortcuts: Ctrl+Space starts or pauses, Enter completes, N switches task, Ctrl+P returns to plan."
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               FontSize="11"
+                               TextWrapping="Wrap"/>
+                </Border>
+
+                <WrapPanel>
+                    <Button Content="Start timer"
+                            Command="{Binding Timer.StartCommand}"
+                            Style="{StaticResource AccentButton}"
+                            Padding="12,7"
+                            Margin="0,0,6,6"/>
+                    <Button Content="Pause"
+                            Command="{Binding Timer.PauseCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="12,7"
+                            Margin="0,0,6,6"/>
+                    <Button Content="Done"
+                            Command="{Binding CompleteFocusedTaskCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="12,7"
+                            Margin="0,0,6,6"/>
+                    <Button Content="Next task"
+                            Command="{Binding NextFocusTaskCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="12,7"
+                            Margin="0,0,6,6"/>
+                    <Button Content="Plan"
+                            Command="{Binding ShowPlanCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="12,7"
+                            Margin="0,0,6,6"/>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

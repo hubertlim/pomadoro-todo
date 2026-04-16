@@ -8,9 +8,9 @@ namespace PomodoroWidget.Views;
 
 public partial class TimerView : UserControl
 {
-    private static readonly Color WorkColor = (Color)System.Windows.Media.ColorConverter.ConvertFromString("#6366F1");
+    private static readonly Color WorkColor = (Color)System.Windows.Media.ColorConverter.ConvertFromString("#14B8A6");
     private static readonly Color RestColor = (Color)System.Windows.Media.ColorConverter.ConvertFromString("#22C55E");
-    private static readonly Color IdleColor = (Color)System.Windows.Media.ColorConverter.ConvertFromString("#94A3B8");
+    private static readonly Color IdleColor = (Color)System.Windows.Media.ColorConverter.ConvertFromString("#9BA3AF");
 
     public TimerView()
     {

@@ -20,7 +20,7 @@ public class TodoItemViewModel : ViewModelBase
     public bool IsCompleted
     {
         get => _model.IsCompleted;
-        set { _model.IsCompleted = value; OnPropertyChanged(); }
+        set { _model.IsCompleted = value; OnPropertyChanged(); OnPropertyChanged(nameof(StatusText)); }
     }
 
     public Priority Priority
@@ -40,6 +40,54 @@ public class TodoItemViewModel : ViewModelBase
     {
         get => _model.PomodoroCount;
         set { _model.PomodoroCount = value; OnPropertyChanged(); }
+    }
+
+    public int EstimatedPomodoros
+    {
+        get => Math.Max(1, _model.EstimatedPomodoros);
+        set
+        {
+            _model.EstimatedPomodoros = Math.Clamp(value, 1, 8);
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(EstimateText));
+        }
+    }
+
+    public string EstimateText => EstimatedPomodoros == 1 ? "1 block" : $"{EstimatedPomodoros} blocks";
+
+    public string PlannedForDate
+    {
+        get => _model.PlannedForDate;
+        set { _model.PlannedForDate = value; OnPropertyChanged(); OnPropertyChanged(nameof(StatusText)); }
+    }
+
+    public string? CompletedDate
+    {
+        get => _model.CompletedDate;
+        set { _model.CompletedDate = value; OnPropertyChanged(); OnPropertyChanged(nameof(StatusText)); }
+    }
+
+    public long? CompletedAt
+    {
+        get => _model.CompletedAt;
+        set { _model.CompletedAt = value; OnPropertyChanged(); }
+    }
+
+    public int RolloverCount
+    {
+        get => _model.RolloverCount;
+        set { _model.RolloverCount = value; OnPropertyChanged(); OnPropertyChanged(nameof(StatusText)); }
+    }
+
+    public string StatusText
+    {
+        get
+        {
+            if (IsCompleted) return "Done today";
+            if (RolloverCount == 1) return "Rolled over once";
+            if (RolloverCount > 1) return $"Rolled over {RolloverCount} times";
+            return "Today";
+        }
     }
 
     private bool _isActive;

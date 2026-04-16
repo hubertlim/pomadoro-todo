@@ -1,0 +1,81 @@
+<UserControl x:Class="PomodoroWidget.Views.ShutdownView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Margin="14,8,14,14">
+        <Border Style="{StaticResource PanelCard}" VerticalAlignment="Top">
+            <StackPanel>
+                <TextBlock Text="Shutdown today"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           FontSize="18" FontWeight="SemiBold"/>
+                <TextBlock Text="Close the loop. Completed work is saved, open tasks stay ready for tomorrow."
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           FontSize="12"
+                           TextWrapping="Wrap"
+                           Margin="0,4,0,14"/>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource PanelCard}" Padding="10" Margin="0,0,4,6">
+                        <StackPanel>
+                            <TextBlock Text="Today" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                            <TextBlock Text="{Binding ShutdownSummaryText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource PanelCard}" Padding="10" Margin="4,0,0,6">
+                        <StackPanel>
+                            <TextBlock Text="Focus goal" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                            <TextBlock Text="{Binding Analytics.TodayGoalText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource PanelCard}" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="Tomorrow" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                            <TextBlock Text="{Binding Todo.PlanSummaryText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding Analytics.RolloverText}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <WrapPanel>
+                    <Button Content="Finish day"
+                            Command="{Binding FinishShutdownCommand}"
+                            Style="{StaticResource AccentButton}"
+                            Padding="14,7"
+                            Margin="0,0,6,6"/>
+                    <Button Content="Back to plan"
+                            Command="{Binding ShowPlanCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="14,7"
+                            Margin="0,0,6,6"/>
+                    <Button Content="Stats"
+                            Command="{Binding ToggleDashboardCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="14,7"
+                            Margin="0,0,6,6"/>
+                    <Button Content="Backup"
+                            Command="{Binding CreateBackupCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="14,7"
+                            Margin="0,0,6,6"/>
+                </WrapPanel>
+
+                <TextBlock Text="{Binding BackupStatusText}"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           FontSize="11"
+                           TextWrapping="Wrap"
+                           Margin="0,6,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

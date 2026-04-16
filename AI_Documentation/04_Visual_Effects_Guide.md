@@ -1,44 +1,26 @@
 # Visual Effects Guide (WPF)
 
-## Active Task Glow Effect
+## Active Task State
 
-Uses `DropShadowEffect` with animated `Opacity` and `BlurRadius`:
+Active tasks use an accent background and border instead of an animated blur. This keeps the current focus obvious without adding a costly `DropShadowEffect` to every task row.
 
 ```xml
-<Style x:Key="ActiveTaskStyle" TargetType="Border">
-  <Setter Property="Effect">
-    <Setter.Value>
-      <DropShadowEffect ShadowDepth="0" Color="#6366F1"
-                        BlurRadius="15" Opacity="0"/>
-    </Setter.Value>
-  </Setter>
-  <Style.Triggers>
-    <DataTrigger Binding="{Binding IsActive}" Value="True">
-      <DataTrigger.EnterActions>
-        <BeginStoryboard>
-          <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-            <DoubleAnimation
-              Storyboard.TargetProperty="(Effect).(DropShadowEffect.Opacity)"
-              From="0.4" To="0.9" Duration="0:0:1"/>
-            <DoubleAnimation
-              Storyboard.TargetProperty="(Effect).(DropShadowEffect.BlurRadius)"
-              From="10" To="25" Duration="0:0:1"/>
-          </Storyboard>
-        </BeginStoryboard>
-      </DataTrigger.EnterActions>
-    </DataTrigger>
-  </Style.Triggers>
-</Style>
+<DataTrigger Binding="{Binding IsActive}" Value="True">
+  <Setter TargetName="TaskBorder" Property="Background" Value="{StaticResource AccentSoftBrush}"/>
+  <Setter TargetName="TaskBorder" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+</DataTrigger>
 ```
 
 ## Task Enter Animation
 
+New task rows still use a short opacity and translate animation. This is cheap, helps the list feel responsive, and avoids constant animation during normal work.
+
 ```xml
-<Storyboard x:Key="SlideInStoryboard">
+<Storyboard>
   <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                   From="0" To="1" Duration="0:0:0.25"/>
+                   From="0" To="1" Duration="0:0:0.18"/>
   <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
-                   From="-10" To="0" Duration="0:0:0.25">
+                   From="-6" To="0" Duration="0:0:0.18">
     <DoubleAnimation.EasingFunction>
       <CubicEase EasingMode="EaseOut"/>
     </DoubleAnimation.EasingFunction>
@@ -48,45 +30,43 @@ Uses `DropShadowEffect` with animated `Opacity` and `BlurRadius`:
 
 ## Circular Timer Progress
 
-WPF `Arc` via `Path` with `ArcSegment`, animated `stroke-dashoffset` equivalent:
+The timer uses a `Path` whose geometry is driven by `ArcEndAngle`. The arc brush is named so code-behind can animate one brush color on phase changes.
 
 ```xml
-<Path Stroke="#6366F1" StrokeThickness="6" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+<Path StrokeThickness="7" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+  <Path.Stroke>
+    <SolidColorBrush x:Name="ArcBrush" Color="#9BA3AF"/>
+  </Path.Stroke>
   <Path.Data>
-    <PathGeometry>
-      <PathFigure StartPoint="{Binding ArcStart}">
-        <ArcSegment Point="{Binding ArcEnd}"
-                    Size="54,54"
-                    IsLargeArc="{Binding IsLargeArc}"
-                    SweepDirection="Clockwise"/>
-      </PathFigure>
-    </PathGeometry>
+    <Binding Path="ArcEndAngle" Converter="{StaticResource AngleToArc}"/>
   </Path.Data>
 </Path>
 ```
 
-Progress is driven by the ViewModel computing arc start/end points based on remaining time.
+## Widget Surface
 
-## Widget Background (Glassmorphism-like)
+The shell uses a compact charcoal surface, an 8px radius, and a single outer shadow. Repeated inner panels use the `PanelCard` style from `Theme.xaml`.
 
 ```xml
-<Border Background="#E60F0F19" CornerRadius="16"
-        BorderBrush="#10FFFFFF" BorderThickness="1">
+<Border Background="{StaticResource BgPrimaryBrush}"
+        CornerRadius="8"
+        BorderBrush="{StaticResource WidgetBorderBrush}"
+        BorderThickness="1">
   <!-- Content -->
 </Border>
 ```
 
 ## Priority Color Indicators
 
-```xml
-<SolidColorBrush x:Key="PriorityLow" Color="#22C55E"/>
-<SolidColorBrush x:Key="PriorityMedium" Color="#EAB308"/>
-<SolidColorBrush x:Key="PriorityHigh" Color="#EF4444"/>
-```
+Priority brushes are cached and frozen in `PriorityToColorConverter` to avoid allocating new brushes during binding refreshes.
+
+- Low: green
+- Medium: amber
+- High: red
 
 ## Performance Notes
 
-- WPF animations run on the composition thread (GPU-accelerated)
-- `DropShadowEffect` is bitmap-cached automatically
-- Use `CacheMode="BitmapCache"` on animated elements for extra smoothness
-- `DispatcherTimer` at 1s interval for countdown — negligible CPU
+- Keep constant animation out of lists.
+- Prefer color, opacity, and translate animations over blur effects.
+- Use one animated timer brush instead of recreating arc visuals.
+- `DispatcherTimer` at a 1s interval remains negligible for this widget.

@@ -1,0 +1,137 @@
+<UserControl x:Class="PomodoroWidget.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:PomodoroWidget.ViewModels">
+
+    <ScrollViewer Margin="14,8,14,14" VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <Border Style="{StaticResource PanelCard}" Margin="0,0,0,8">
+                <StackPanel>
+                    <TextBlock Text="{Binding CheckInText}"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               FontSize="15" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding MomentumText}"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               FontSize="12" Margin="0,3,0,12"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.2*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Streak" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                            <TextBlock Text="{Binding StreakText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="18" FontWeight="SemiBold"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Best" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                            <TextBlock Text="{Binding LongestStreak}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="18" FontWeight="SemiBold"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Focus goal" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                            <TextBlock Text="{Binding TodayGoalText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="18" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <ProgressBar Value="{Binding TodayGoalPercent, Mode=OneWay}" Maximum="100" Margin="0,12,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource PanelCard}" Padding="10" Margin="0,0,4,6">
+                    <StackPanel>
+                        <TextBlock Text="Planned" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                        <TextBlock Text="{Binding TodayPlanText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="14" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource PanelCard}" Padding="10" Margin="4,0,0,6">
+                    <StackPanel>
+                        <TextBlock Text="Completed" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                        <TextBlock Text="{Binding TodayDoneText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="14" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource PanelCard}" Padding="10" Margin="0,0,4,0">
+                    <StackPanel>
+                        <TextBlock Text="Focus time" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                        <TextBlock Text="{Binding TodayFocusMinutes, StringFormat={}{0} min}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="14" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource PanelCard}" Padding="10" Margin="4,0,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Carry-over" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                        <TextBlock Text="{Binding RolloverText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="14" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Style="{StaticResource PanelCard}" Margin="0,0,0,8">
+                <StackPanel>
+                    <TextBlock Text="7 day trend"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               FontSize="13" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                    <ItemsControl ItemsSource="{Binding Week}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:DayProgressViewModel}">
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="42"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="82"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0" Text="{Binding DayLabel}"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="11" VerticalAlignment="Center"/>
+                                    <ProgressBar Grid.Column="1" Value="{Binding GoalPercent, Mode=OneWay}" Maximum="100"
+                                                 VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding SummaryText}"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="10" TextAlignment="Right"
+                                               VerticalAlignment="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource PanelCard}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Week focus" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                        <TextBlock Text="{Binding WeekFocusMinutes, StringFormat={}{0} min}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="14" FontWeight="SemiBold"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Tasks done" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                        <TextBlock Text="{Binding WeekTasksCompleted}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="14" FontWeight="SemiBold"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Done rate" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                        <TextBlock Text="{Binding WeekCompletionPercent, StringFormat={}{0}%}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="14" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

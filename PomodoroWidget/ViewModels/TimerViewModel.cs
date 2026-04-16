@@ -42,7 +42,7 @@ public class TimerViewModel : ViewModelBase
     // Derived properties
     public string RemainingText => $"{Remaining / 60:D2}:{Remaining % 60:D2}";
     public string PhaseText => CurrentPhase.ToString().ToUpper();
-    public string PhaseColor => CurrentPhase == Phase.Work ? "#6366F1" : CurrentPhase == Phase.Rest ? "#22C55E" : "#94A3B8";
+    public string PhaseColor => CurrentPhase == Phase.Work ? "#14B8A6" : CurrentPhase == Phase.Rest ? "#22C55E" : "#9BA3AF";
     public bool IsIdle => CurrentPhase == Phase.Idle && !IsRunning;
     public int MaxSessions => (WorkMinutes + RestMinutes) > 0 ? TotalMinutes / (WorkMinutes + RestMinutes) : 0;
     public string SessionText => $"{SessionCount} / {MaxSessions}";

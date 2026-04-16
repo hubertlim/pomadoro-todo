@@ -3,15 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:PomodoroWidget.ViewModels">
 
-    <Grid Margin="12,8,12,12">
+    <Grid Margin="14,8,14,14">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Add task bar -->
-        <Grid Grid.Row="0" Margin="0,0,0,8">
+        <Grid Grid.Row="0" Margin="0,0,0,10"
+              Visibility="{Binding HasTasks, Converter={StaticResource BoolToVis}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -20,181 +21,260 @@
 
             <TextBox Text="{Binding NewTaskText, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource WidgetTextBox}"
-                     Tag="Add a task..."
+                     Tag="Add today's task..."
                      KeyDown="TaskInput_KeyDown"/>
 
             <ComboBox Grid.Column="1" SelectedIndex="{Binding NewTaskPriority}"
-                      Margin="4,0" Width="50" VerticalAlignment="Stretch"
-                      Background="{StaticResource BgInputBrush}"
-                      Foreground="{StaticResource TextPrimaryBrush}"
-                      FontSize="11" ToolTip="Priority">
+                      Margin="6,0" Width="62" VerticalAlignment="Stretch"
+                      ToolTip="Priority">
                 <ComboBoxItem Content="Low"/>
                 <ComboBoxItem Content="Med"/>
-                <ComboBoxItem Content="Hi"/>
+                <ComboBoxItem Content="High"/>
             </ComboBox>
 
-            <Button Grid.Column="2" Content="+"
+            <Button Grid.Column="2" Content="Add"
                     Command="{Binding AddCommand}"
                     Style="{StaticResource AccentButton}"
-                    Width="34" FontSize="16" Padding="0,4"/>
+                    MinWidth="46" FontSize="12" Padding="10,6"/>
         </Grid>
 
-        <!-- Task list -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding Todos}">
-                <ItemsControl.ItemContainerStyle>
-                    <Style TargetType="ContentPresenter">
-                        <Setter Property="RenderTransform">
-                            <Setter.Value>
-                                <TranslateTransform Y="-8"/>
-                            </Setter.Value>
-                        </Setter>
-                        <Setter Property="Opacity" Value="0"/>
-                        <Style.Triggers>
-                            <EventTrigger RoutedEvent="Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                         From="0" To="1" Duration="0:0:0.25"/>
-                                        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
-                                                         From="-8" To="0" Duration="0:0:0.25">
-                                            <DoubleAnimation.EasingFunction>
-                                                <CubicEase EasingMode="EaseOut"/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ItemsControl.ItemContainerStyle>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type vm:TodoItemViewModel}">
-                        <Border x:Name="TaskBorder" Margin="0,2" Padding="8,6"
-                                CornerRadius="8"
-                                Background="{StaticResource BgSecondaryBrush}"
-                                BorderBrush="#08FFFFFF" BorderThickness="1">
-                            <Border.Effect>
-                                <DropShadowEffect x:Name="GlowEffect" ShadowDepth="0"
-                                                  Color="#6366F1" BlurRadius="0" Opacity="0"/>
-                            </Border.Effect>
-                            <Border.RenderTransform>
-                                <TranslateTransform/>
-                            </Border.RenderTransform>
+        <TextBlock Grid.Row="1"
+                   Text="{Binding PlanSummaryText}"
+                   Foreground="{StaticResource TextSecondaryBrush}"
+                   FontSize="11"
+                   Margin="2,0,0,8"
+                   Visibility="{Binding HasTasks, Converter={StaticResource BoolToVis}}"/>
 
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+        <Border Grid.Row="2" Style="{StaticResource PanelCard}"
+                Padding="14"
+                VerticalAlignment="Top"
+                Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}">
+            <StackPanel>
+                <TextBlock Text="Plan today"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           FontSize="18" FontWeight="SemiBold"/>
+                <TextBlock Text="Start with one clear task. You can add more after the first one is on the board."
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           FontSize="12"
+                           TextWrapping="Wrap"
+                           Margin="0,4,0,14"/>
 
-                                <!-- Priority dot -->
-                                <Ellipse Grid.Column="0" Width="8" Height="8" Margin="0,0,6,0"
-                                         Fill="{Binding Priority, Converter={StaticResource PriorityToColor}}"
-                                         Cursor="Hand" ToolTip="Click to cycle priority"
-                                         MouseLeftButtonDown="PriorityDot_Click"/>
+                <TextBlock Text="First task"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           FontSize="11" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding NewTaskText, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource WidgetTextBox}"
+                         Tag="What needs your focus today?"
+                         KeyDown="TaskInput_KeyDown"/>
 
-                                <!-- Checkbox -->
-                                <CheckBox Grid.Column="1" IsChecked="{Binding IsCompleted}"
-                                          VerticalAlignment="Center" Margin="0,0,6,0"
-                                          Command="{Binding DataContext.ToggleCompleteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                          CommandParameter="{Binding}"/>
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                                <!-- Text (display mode) -->
-                                <TextBlock Grid.Column="2" Text="{Binding Text}"
-                                           Foreground="{StaticResource TextPrimaryBrush}"
-                                           FontSize="13" VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis"
-                                           Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVis}}"
-                                           MouseLeftButtonDown="TaskText_DoubleClick">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
-                                                    <Setter Property="TextDecorations" Value="Strikethrough"/>
-                                                    <Setter Property="Opacity" Value="0.5"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                    <ComboBox SelectedIndex="{Binding NewTaskPriority}"
+                              Width="96" HorizontalAlignment="Left"
+                              ToolTip="Priority">
+                        <ComboBoxItem Content="Low"/>
+                        <ComboBoxItem Content="Medium"/>
+                        <ComboBoxItem Content="High"/>
+                    </ComboBox>
 
-                                <!-- Text (edit mode) -->
-                                <TextBox Grid.Column="2" Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource WidgetTextBox}" FontSize="13"
-                                         Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}"
-                                         LostFocus="EditBox_LostFocus" KeyDown="EditBox_KeyDown"
-                                         Loaded="EditBox_Loaded"/>
+                    <Button Grid.Column="1" Content="Add task"
+                            Command="{Binding AddCommand}"
+                            Style="{StaticResource AccentButton}"
+                            Padding="14,7"/>
+                </Grid>
+            </StackPanel>
+        </Border>
 
-                                <!-- Pomodoro count -->
-                                <TextBlock Grid.Column="3" VerticalAlignment="Center"
-                                           Foreground="{StaticResource TextSecondaryBrush}"
-                                           FontSize="11" Margin="4,0">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value=""/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding PomodoroCount}" Value="0">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                    <Run Text="🍅"/><Run Text="{Binding PomodoroCount, Mode=OneWay}"/>
-                                </TextBlock>
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                      Visibility="{Binding HasTasks, Converter={StaticResource BoolToVis}}">
+            <StackPanel>
+                <Border Style="{StaticResource PanelCard}"
+                        Margin="0,0,0,8"
+                        Padding="12"
+                        Visibility="{Binding NeedsTopTask, Converter={StaticResource BoolToVis}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Pick the top task"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding TopTaskPromptText}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="11"
+                                       TextWrapping="Wrap"
+                                       Margin="0,3,8,0"/>
+                        </StackPanel>
+                        <Button Grid.Column="1"
+                                Content="Use first"
+                                Command="{Binding SelectFirstOpenTaskCommand}"
+                                Style="{StaticResource AccentButton}"
+                                FontSize="11"
+                                Padding="10,6"
+                                VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
 
-                                <!-- Link to timer -->
-                                <Button Grid.Column="4" Content="⏱" FontSize="14" Padding="2"
-                                        Style="{StaticResource WidgetButton}" ToolTip="Link to timer"
-                                        Command="{Binding DataContext.LinkToTimerCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                        CommandParameter="{Binding}"/>
-
-                                <!-- Delete -->
-                                <Button Grid.Column="5" Content="✕" FontSize="11" Padding="2"
-                                        Style="{StaticResource WidgetButton}" Opacity="0.5"
-                                        ToolTip="Delete"
-                                        Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                        CommandParameter="{Binding}"/>
-                            </Grid>
-                        </Border>
-
-                        <!-- Glow animation trigger -->
-                        <DataTemplate.Triggers>
-                            <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                <DataTrigger.EnterActions>
-                                    <BeginStoryboard x:Name="GlowStoryboard">
-                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="GlowEffect"
-                                                Storyboard.TargetProperty="Opacity"
-                                                From="0.3" To="0.85" Duration="0:0:1"/>
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="GlowEffect"
-                                                Storyboard.TargetProperty="BlurRadius"
-                                                From="8" To="22" Duration="0:0:1"/>
+                <ItemsControl ItemsSource="{Binding Todos}">
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="RenderTransform">
+                                <Setter.Value>
+                                    <TranslateTransform Y="-6"/>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="Opacity" Value="0"/>
+                            <Style.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             From="0" To="1" Duration="0:0:0.18"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                                                             From="-6" To="0" Duration="0:0:0.18">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
                                         </Storyboard>
                                     </BeginStoryboard>
-                                </DataTrigger.EnterActions>
-                                <DataTrigger.ExitActions>
-                                    <StopStoryboard BeginStoryboardName="GlowStoryboard"/>
-                                </DataTrigger.ExitActions>
-                                <Setter TargetName="TaskBorder" Property="BorderBrush" Value="#606366F1"/>
-                            </DataTrigger>
-                        </DataTemplate.Triggers>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                                </EventTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:TodoItemViewModel}">
+                            <Border x:Name="TaskBorder" Margin="0,3" Padding="10,8"
+                                    CornerRadius="8"
+                                    Background="{StaticResource BgSecondaryBrush}"
+                                    BorderBrush="{StaticResource HairlineBrush}" BorderThickness="1">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Ellipse Grid.RowSpan="2" Grid.Column="0" Width="8" Height="8" Margin="0,4,8,0"
+                                             VerticalAlignment="Top"
+                                             Fill="{Binding Priority, Converter={StaticResource PriorityToColor}}"
+                                             Cursor="Hand" ToolTip="Click to cycle priority"
+                                             MouseLeftButtonDown="PriorityDot_Click"/>
+
+                                    <CheckBox Grid.RowSpan="2" Grid.Column="1" IsChecked="{Binding IsCompleted, Mode=OneWay}"
+                                              VerticalAlignment="Top" Margin="0,1,8,0"
+                                              Command="{Binding DataContext.ToggleCompleteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                              CommandParameter="{Binding}"/>
+
+                                    <TextBlock Grid.Column="2" Text="{Binding Text}"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               FontSize="13" FontWeight="Medium"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"
+                                               Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVis}}"
+                                               MouseLeftButtonDown="TaskText_DoubleClick">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                        <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                                        <Setter Property="Opacity" Value="0.52"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+
+                                    <TextBox Grid.Column="2" Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource WidgetTextBox}" FontSize="13"
+                                             Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}"
+                                             LostFocus="EditBox_LostFocus" KeyDown="EditBox_KeyDown"
+                                             Loaded="EditBox_Loaded"/>
+
+                                    <Button Grid.Column="3" Content="Focus" FontSize="11" Padding="7,3" Margin="8,0,0,0"
+                                            Style="{StaticResource WidgetButton}" ToolTip="Link to timer"
+                                            Command="{Binding DataContext.LinkToTimerCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"/>
+
+                                    <Button Grid.Column="4" Content="Del" FontSize="11" Padding="7,3" Margin="5,0,0,0"
+                                            Style="{StaticResource WidgetButton}" Opacity="0.58"
+                                            ToolTip="Delete"
+                                            Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"/>
+
+                                    <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" Margin="0,4,0,0">
+                                        <TextBlock Text="{Binding PomodoroCount, StringFormat={}P{0}}"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   FontSize="10" Margin="0,0,6,0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding PomodoroCount}" Value="0">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding StatusText}"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   FontSize="10"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2"
+                                                Orientation="Horizontal"
+                                                HorizontalAlignment="Right"
+                                                Margin="8,4,0,0">
+                                        <Button Content="-"
+                                                Command="{Binding DataContext.DecreaseEstimateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"
+                                                Style="{StaticResource WidgetButton}"
+                                                FontSize="10"
+                                                Padding="5,1"/>
+                                        <TextBlock Text="{Binding EstimateText}"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   FontSize="10"
+                                                   VerticalAlignment="Center"
+                                                   Margin="5,0"/>
+                                        <Button Content="+"
+                                                Command="{Binding DataContext.IncreaseEstimateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"
+                                                Style="{StaticResource WidgetButton}"
+                                                FontSize="10"
+                                                Padding="5,1"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                    <Setter TargetName="TaskBorder" Property="Background" Value="{StaticResource AccentSoftBrush}"/>
+                                    <Setter TargetName="TaskBorder" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
         </ScrollViewer>
 
-        <!-- Clear completed -->
-        <Button Grid.Row="2" Content="Clear completed"
+        <Button Grid.Row="3" Content="Clear completed"
                 Command="{Binding ClearCompletedCommand}"
                 Style="{StaticResource WidgetButton}"
                 Foreground="{StaticResource TextSecondaryBrush}"
-                FontSize="11" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                FontSize="11" HorizontalAlignment="Right" Margin="0,8,0,0"/>
     </Grid>
 </UserControl>

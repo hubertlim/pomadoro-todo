@@ -9,5 +9,10 @@ public class TodoItem
     public bool IsCompleted { get; set; }
     public Priority Priority { get; set; } = Priority.Medium;
     public int PomodoroCount { get; set; }
+    public int EstimatedPomodoros { get; set; } = 1;
     public long CreatedAt { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+    public string PlannedForDate { get; set; } = DateTime.Now.ToString("yyyy-MM-dd");
+    public string? CompletedDate { get; set; }
+    public long? CompletedAt { get; set; }
+    public int RolloverCount { get; set; }
 }

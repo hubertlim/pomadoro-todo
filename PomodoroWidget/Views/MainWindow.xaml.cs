@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using PomodoroWidget.Services;
 using PomodoroWidget.ViewModels;
@@ -79,6 +80,40 @@ public partial class MainWindow : Window
         else if (e.Key == Key.E && Keyboard.Modifiers == ModifierKeys.Control)
         {
             VM.ToggleExpandCommand.Execute(null);
+            e.Handled = true;
+        }
+        // Ctrl+P: return to plan
+        else if (e.Key == Key.P && Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            VM.ShowPlanCommand.Execute(null);
+            e.Handled = true;
+        }
+        // Ctrl+F: enter focus mode
+        else if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            VM.BeginFocusCommand.Execute(null);
+            e.Handled = true;
+        }
+        // Ctrl+Enter: choose the first open task and enter focus mode
+        else if ((e.Key == Key.Enter || e.Key == Key.Return) && Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            VM.SelectTopTaskAndFocusCommand.Execute(null);
+            e.Handled = true;
+        }
+        // Enter in Focus: complete current task and move to the next open task
+        else if (VM.IsFocusVisible && (e.Key == Key.Enter || e.Key == Key.Return)
+                 && Keyboard.Modifiers == ModifierKeys.None
+                 && e.OriginalSource is not TextBox)
+        {
+            VM.CompleteFocusedTaskCommand.Execute(null);
+            e.Handled = true;
+        }
+        // N in Focus: switch to the next open task
+        else if (VM.IsFocusVisible && e.Key == Key.N
+                 && Keyboard.Modifiers == ModifierKeys.None
+                 && e.OriginalSource is not TextBox)
+        {
+            VM.NextFocusTaskCommand.Execute(null);
             e.Handled = true;
         }
         // Escape: minimize to tray

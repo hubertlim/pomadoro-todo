@@ -4,8 +4,8 @@
         xmlns:vm="clr-namespace:PomodoroWidget.ViewModels"
         xmlns:views="clr-namespace:PomodoroWidget.Views"
         Title="Pomodoro Widget"
-        Width="360" Height="580"
-        MinWidth="300" MinHeight="200"
+        Width="380" Height="660"
+        MinWidth="320" MinHeight="240"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -18,12 +18,31 @@
     </Window.DataContext>
 
     <Border Background="{StaticResource BgPrimaryBrush}"
-            CornerRadius="14"
-            BorderBrush="#10FFFFFF" BorderThickness="1"
+            CornerRadius="8"
+            BorderBrush="{StaticResource WidgetBorderBrush}" BorderThickness="1"
             Margin="8">
         <Border.Effect>
-            <DropShadowEffect ShadowDepth="0" BlurRadius="12" Opacity="0.4" Color="Black"/>
+            <DropShadowEffect ShadowDepth="0" BlurRadius="10" Opacity="0.32" Color="Black"/>
         </Border.Effect>
+        <Border.RenderTransform>
+            <TranslateTransform Y="0"/>
+        </Border.RenderTransform>
+        <Border.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                         From="0" To="1" Duration="0:0:0.16"/>
+                        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                                         From="6" To="0" Duration="0:0:0.16">
+                            <DoubleAnimation.EasingFunction>
+                                <CubicEase EasingMode="EaseOut"/>
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Border.Triggers>
 
         <Grid>
             <Grid.RowDefinitions>
@@ -32,7 +51,6 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Title Bar -->
             <Border Grid.Row="0" Background="Transparent"
                     MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"
                     Padding="12,8">
@@ -41,31 +59,57 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="🍅 Pomodoro Widget"
-                               Foreground="{StaticResource TextPrimaryBrush}"
-                               FontSize="13" FontWeight="SemiBold" Opacity="0.85"
-                               VerticalAlignment="Center"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Pomodoro"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontSize="13" FontWeight="SemiBold"/>
+                        <TextBlock Text="Plan, focus, return tomorrow"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10" Margin="0,1,0,0"/>
+                    </StackPanel>
 
                     <Button Grid.Column="1"
-                            Content="{Binding IsExpanded, Converter={StaticResource BoolToVis}, ConverterParameter=toggle}"
-                            Command="{Binding ToggleExpandCommand}"
+                            Command="{Binding ShowPlanCommand}"
                             Style="{StaticResource WidgetButton}"
-                            Width="28" Height="28" Padding="0"
-                            FontSize="14" ToolTip="Toggle todo list">
-                        <Button.ContentTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="☰" FontSize="14"/>
-                            </DataTemplate>
-                        </Button.ContentTemplate>
+                            Height="28" Padding="7,0"
+                            FontSize="11" ToolTip="Plan today">
+                        <TextBlock Text="Plan"/>
                     </Button>
 
                     <Button Grid.Column="2"
+                            Command="{Binding BeginFocusCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Height="28" Padding="7,0"
+                            FontSize="11" ToolTip="Focus current task">
+                        <TextBlock Text="Focus"/>
+                    </Button>
+
+                    <Button Grid.Column="3"
+                            Command="{Binding ToggleDashboardCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Height="28" Padding="7,0"
+                            FontSize="11" ToolTip="Progress dashboard">
+                        <TextBlock Text="Stats"/>
+                    </Button>
+
+                    <Button Grid.Column="4"
+                            Command="{Binding BeginShutdownCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Height="28" Padding="7,0"
+                            FontSize="11" ToolTip="Shutdown today">
+                        <TextBlock Text="End"/>
+                    </Button>
+
+                    <Button Grid.Column="5"
                             Style="{StaticResource WidgetButton}"
                             Width="28" Height="28" Padding="0"
                             Click="CloseButton_Click" ToolTip="Close">
-                        <TextBlock Text="✕" FontSize="12" Opacity="0.6"/>
+                        <TextBlock Text="x" FontSize="12" Opacity="0.6"/>
                     </Button>
                 </Grid>
             </Border>
@@ -73,12 +117,21 @@
             <Border Grid.Row="0" BorderBrush="#10FFFFFF" BorderThickness="0,0,0,1"
                     VerticalAlignment="Bottom"/>
 
-            <!-- Timer -->
             <views:TimerView Grid.Row="1" DataContext="{Binding Timer}"/>
 
-            <!-- Todo List -->
-            <views:TodoListView Grid.Row="2" DataContext="{Binding Todo}"
-                                Visibility="{Binding DataContext.IsExpanded, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}"/>
+            <Grid Grid.Row="2"
+                  Visibility="{Binding DataContext.IsExpanded, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}">
+                <views:MorningReviewView DataContext="{Binding Todo}"
+                                         Visibility="{Binding DataContext.IsReviewVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}"/>
+                <views:TodoListView DataContext="{Binding Todo}"
+                                    Visibility="{Binding DataContext.IsPlanVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}"/>
+                <views:FocusView DataContext="{Binding}"
+                                 Visibility="{Binding IsFocusVisible, Converter={StaticResource BoolToVis}}"/>
+                <views:DashboardView DataContext="{Binding Analytics}"
+                                     Visibility="{Binding DataContext.IsDashboardVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}"/>
+                <views:ShutdownView DataContext="{Binding}"
+                                    Visibility="{Binding IsShutdownVisible, Converter={StaticResource BoolToVis}}"/>
+            </Grid>
         </Grid>
     </Border>
 </Window>
