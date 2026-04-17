@@ -14,7 +14,7 @@ Build the core loop first:
 - The todo list remains the planning surface. A separate planner would duplicate task creation, priority, estimates, and rollover logic.
 - The timer remains a single global surface at the top of the widget. Focus mode references it instead of embedding another timer.
 - The dashboard remains the analytics surface. Shutdown mode summarizes the day without recreating charts.
-- Task rollover stays in `TodoViewModel.LoadFrom`, so shutdown does not need its own carry-over implementation.
+- Morning rollover still stays in `TodoViewModel.LoadFrom`; Shutdown only adds an explicit "move open work to tomorrow" action for users who want to pre-plan the next day.
 
 ## Implemented
 
@@ -26,6 +26,11 @@ Build the core loop first:
 - Added Morning Review for unfinished tasks from previous days, with choices to keep today, defer until tomorrow, or drop.
 - Added a top-task prompt in the planning surface so the user deliberately chooses the first focus target after review or initial planning.
 - Added keyboard-first flow: Ctrl+Enter chooses the first open task and enters Focus, Ctrl+F enters Focus, Ctrl+P returns to Plan, Enter completes in Focus, and N switches to the next open task.
+- Added adjustable daily focus-goal controls in the dashboard.
+- Added a Shutdown action to move all open tasks into tomorrow's plan, plus a preview of tomorrow's queued work.
+- Added per-task focus progress, shown in the task list and Focus mode.
+- Added weekly dashboard insight metrics for consistency, average focus, best day, and a short next-step nudge.
+- Replaced the static header subtitle with a workflow-aware nudge that changes during review, planning, focus, stats, and shutdown.
 
 ## Next Step
 

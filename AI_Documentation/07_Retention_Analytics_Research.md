@@ -14,6 +14,9 @@
 - Use bite-sized sessions: Duolingo emphasizes quick sessions that fit into a day. Pomodoro focus blocks match that pattern, so the dashboard measures progress by completed focus blocks.
 - Show progress, not just pressure: Duolingo combines points, streaks, milestones, and progress surfaces. The dashboard now shows planned tasks, completed tasks, carry-over, focus minutes, completion rate, and a 7-day trend.
 - Be forgiving about unfinished work: Duolingo uses Streak Freeze to avoid demotivating users when life interrupts the habit. This app applies a lighter version by automatically rolling unfinished tasks into the new day instead of making the user rebuild the list from memory.
+- Convert raw stats into a next nudge: the dashboard now turns weekly data into consistency, average focus, best-day, and guidance text so the user sees what to do next instead of reading a cold report.
+- Make progress tangible at task level: each task now shows focus blocks completed against its estimate, and Focus mode repeats that progress next to the current task.
+- Keep the next action visible: the window header now adapts from static branding to a short context nudge, similar to habit apps that keep the next step obvious.
 
 ## Sources
 

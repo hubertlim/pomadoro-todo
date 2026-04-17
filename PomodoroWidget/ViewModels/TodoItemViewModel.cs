@@ -39,7 +39,13 @@ public class TodoItemViewModel : ViewModelBase
     public int PomodoroCount
     {
         get => _model.PomodoroCount;
-        set { _model.PomodoroCount = value; OnPropertyChanged(); }
+        set
+        {
+            _model.PomodoroCount = Math.Max(0, value);
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(FocusProgressPercent));
+            OnPropertyChanged(nameof(FocusProgressText));
+        }
     }
 
     public int EstimatedPomodoros
@@ -50,10 +56,22 @@ public class TodoItemViewModel : ViewModelBase
             _model.EstimatedPomodoros = Math.Clamp(value, 1, 8);
             OnPropertyChanged();
             OnPropertyChanged(nameof(EstimateText));
+            OnPropertyChanged(nameof(FocusProgressPercent));
+            OnPropertyChanged(nameof(FocusProgressText));
         }
     }
 
     public string EstimateText => EstimatedPomodoros == 1 ? "1 block" : $"{EstimatedPomodoros} blocks";
+    public double FocusProgressPercent => Math.Min(100, (double)PomodoroCount / EstimatedPomodoros * 100);
+    public string FocusProgressText
+    {
+        get
+        {
+            if (PomodoroCount <= 0) return $"0/{EstimatedPomodoros} focus blocks";
+            if (PomodoroCount >= EstimatedPomodoros) return $"{PomodoroCount}/{EstimatedPomodoros} blocks done";
+            return $"{PomodoroCount}/{EstimatedPomodoros} blocks complete";
+        }
+    }
 
     public string PlannedForDate
     {

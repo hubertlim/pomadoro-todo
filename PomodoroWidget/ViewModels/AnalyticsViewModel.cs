@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Windows.Input;
 using PomodoroWidget.Models;
 
 namespace PomodoroWidget.ViewModels;
@@ -25,6 +26,7 @@ public class AnalyticsViewModel : ViewModelBase
             if (SetProperty(ref _dailyPomodoroGoal, next))
             {
                 Refresh();
+                CommandManager.InvalidateRequerySuggested();
                 Changed?.Invoke();
             }
         }
@@ -71,6 +73,41 @@ public class AnalyticsViewModel : ViewModelBase
     public int WeekCompletionPercent => WeekTasksCreated > 0
         ? (int)Math.Round((double)WeekTasksCompleted / WeekTasksCreated * 100)
         : 0;
+    public int ActiveDaysCount => LastSevenDays().Count(day => day.CheckedIn || day.PomodorosCompleted > 0 || day.TasksCompleted > 0);
+    public int AverageFocusMinutes => ActiveDaysCount > 0
+        ? (int)Math.Round((double)WeekFocusMinutes / ActiveDaysCount)
+        : 0;
+    public string ConsistencyText => ActiveDaysCount == 1
+        ? "1 active day"
+        : $"{ActiveDaysCount}/7 active days";
+    public string BestDayText
+    {
+        get
+        {
+            var best = LastSevenDays()
+                .OrderByDescending(day => day.PomodorosCompleted)
+                .ThenByDescending(day => day.TasksCompleted)
+                .FirstOrDefault();
+
+            if (best == null || (best.PomodorosCompleted == 0 && best.TasksCompleted == 0))
+                return "No peak day yet";
+
+            var date = DateTime.ParseExact(best.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var label = best.Date == _todayKey ? "Today" : date.ToString("ddd", CultureInfo.InvariantCulture);
+            return $"{label}: {best.PomodorosCompleted} blocks, {best.TasksCompleted} done";
+        }
+    }
+    public string WeeklyInsightText
+    {
+        get
+        {
+            if (!Today.CheckedIn) return "One small check-in protects the habit today.";
+            if (TodayPomodoros < DailyPomodoroGoal) return "Start the next focus block before adding more tasks.";
+            if (WeekCompletionPercent < 60 && WeekTasksCreated >= 3) return "Tomorrow will work better with a smaller list.";
+            if (ActiveDaysCount >= 5) return "Strong week. Keep tomorrow's plan intentionally light.";
+            return "Momentum is building. Repeat the same simple loop tomorrow.";
+        }
+    }
     public string MomentumText
     {
         get
@@ -82,9 +119,18 @@ public class AnalyticsViewModel : ViewModelBase
         }
     }
 
+    public ICommand IncreaseDailyGoalCommand { get; }
+    public ICommand DecreaseDailyGoalCommand { get; }
+
     public event Action? Changed;
 
     private DailyProgress Today => EnsureDay(_todayKey);
+
+    public AnalyticsViewModel()
+    {
+        IncreaseDailyGoalCommand = new RelayCommand(_ => DailyPomodoroGoal++, _ => DailyPomodoroGoal < 12);
+        DecreaseDailyGoalCommand = new RelayCommand(_ => DailyPomodoroGoal--, _ => DailyPomodoroGoal > 1);
+    }
 
     public void LoadFrom(
         IEnumerable<DailyProgress> progress,
@@ -225,6 +271,11 @@ public class AnalyticsViewModel : ViewModelBase
         OnPropertyChanged(nameof(WeekTasksCompleted));
         OnPropertyChanged(nameof(WeekTasksCreated));
         OnPropertyChanged(nameof(WeekCompletionPercent));
+        OnPropertyChanged(nameof(ActiveDaysCount));
+        OnPropertyChanged(nameof(AverageFocusMinutes));
+        OnPropertyChanged(nameof(ConsistencyText));
+        OnPropertyChanged(nameof(BestDayText));
+        OnPropertyChanged(nameof(WeeklyInsightText));
         OnPropertyChanged(nameof(MomentumText));
     }
 

@@ -68,9 +68,11 @@
                         <TextBlock Text="Pomodoro"
                                    Foreground="{StaticResource TextPrimaryBrush}"
                                    FontSize="13" FontWeight="SemiBold"/>
-                        <TextBlock Text="Plan, focus, return tomorrow"
+                        <TextBlock Text="{Binding WorkflowNudgeText}"
                                    Foreground="{StaticResource TextSecondaryBrush}"
-                                   FontSize="10" Margin="0,1,0,0"/>
+                                   FontSize="10"
+                                   TextTrimming="CharacterEllipsis"
+                                   Margin="0,1,8,0"/>
                     </StackPanel>
 
                     <Button Grid.Column="1"

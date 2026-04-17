@@ -30,6 +30,12 @@
                                    FontWeight="SemiBold"
                                    TextWrapping="Wrap"
                                    Margin="0,4,0,0"/>
+                        <TextBlock Text="{Binding Todo.LinkedTask.FocusProgressText}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="11"
+                                   Margin="0,8,0,4"/>
+                        <ProgressBar Value="{Binding Todo.LinkedTask.FocusProgressPercent, Mode=OneWay}"
+                                     Maximum="100"/>
                     </StackPanel>
                 </Border>
 

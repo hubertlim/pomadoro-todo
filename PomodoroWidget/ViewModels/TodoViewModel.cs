@@ -25,6 +25,8 @@ public class TodoViewModel : ViewModelBase
     public int OpenTasksCount => Todos.Count(t => !t.IsCompleted);
     public int CompletedTasksCount => Todos.Count(t => t.IsCompleted);
     public int PlannedFocusBlocks => Todos.Where(t => !t.IsCompleted).Sum(t => t.EstimatedPomodoros);
+    public int TomorrowTasksCount => _archive.Count(IsTomorrowOpenTask);
+    public int TomorrowFocusBlocks => _archive.Where(IsTomorrowOpenTask).Sum(t => t.EstimatedPomodoros);
     public string PlanSummaryText
     {
         get
@@ -33,6 +35,16 @@ public class TodoViewModel : ViewModelBase
             var taskText = OpenTasksCount == 1 ? "1 open task" : $"{OpenTasksCount} open tasks";
             var blockText = PlannedFocusBlocks == 1 ? "1 focus block" : $"{PlannedFocusBlocks} focus blocks";
             return $"{taskText} planned, about {blockText}.";
+        }
+    }
+    public string TomorrowPlanText
+    {
+        get
+        {
+            if (TomorrowTasksCount == 0) return "No tasks moved to tomorrow yet.";
+            var taskText = TomorrowTasksCount == 1 ? "1 task" : $"{TomorrowTasksCount} tasks";
+            var blockText = TomorrowFocusBlocks == 1 ? "1 focus block" : $"{TomorrowFocusBlocks} focus blocks";
+            return $"{taskText} ready for tomorrow, about {blockText}.";
         }
     }
     public string TopTaskPromptText => OpenTasksCount == 1
@@ -186,6 +198,8 @@ public class TodoViewModel : ViewModelBase
     {
         if (item == null) return;
         LinkedTask = LinkedTask == item ? null : item;
+        NotifyPlanProperties();
+        NotifyChanged();
     }
 
     private void CyclePriority(TodoItemViewModel? item)
@@ -232,6 +246,7 @@ public class TodoViewModel : ViewModelBase
             if (!item.IsCompleted && IsFutureDate(item.PlannedForDate, _todayKey))
             {
                 _archive.Add(item);
+                NotifyTomorrowProperties();
                 continue;
             }
 
@@ -247,6 +262,7 @@ public class TodoViewModel : ViewModelBase
             }
         }
 
+        NotifyTomorrowProperties();
         NotifyChanged();
         return carriedOver;
     }
@@ -271,6 +287,7 @@ public class TodoViewModel : ViewModelBase
         var first = Todos.FirstOrDefault(t => !t.IsCompleted);
         if (first == null) return false;
         LinkedTask = first;
+        NotifyPlanProperties();
         return true;
     }
 
@@ -281,6 +298,7 @@ public class TodoViewModel : ViewModelBase
 
         var currentIndex = LinkedTask == null ? -1 : openTasks.IndexOf(LinkedTask);
         LinkedTask = openTasks[(currentIndex + 1 + openTasks.Count) % openTasks.Count];
+        NotifyPlanProperties();
         return true;
     }
 
@@ -290,6 +308,29 @@ public class TodoViewModel : ViewModelBase
         ToggleComplete(LinkedTask);
         LinkFirstOpenTask();
         return true;
+    }
+
+    public int MoveOpenTasksToTomorrow()
+    {
+        var openTasks = Todos.Where(t => !t.IsCompleted).ToList();
+        foreach (var item in openTasks)
+        {
+            if (LinkedTask == item)
+                LinkedTask = null;
+
+            item.PlannedForDate = TomorrowKey();
+            item.PropertyChanged -= OnItemPropertyChanged;
+            Todos.Remove(item);
+            _archive.Add(item.Model);
+        }
+
+        if (openTasks.Count == 0)
+            return 0;
+
+        NotifyPlanProperties();
+        NotifyTomorrowProperties();
+        NotifyChanged();
+        return openTasks.Count;
     }
 
     private void KeepReviewTask(TodoItemViewModel? item)
@@ -311,6 +352,7 @@ public class TodoViewModel : ViewModelBase
         ReviewTasks.Remove(item);
         _archive.Add(item.Model);
         NotifyReviewProperties();
+        NotifyTomorrowProperties();
         NotifyChanged();
     }
 
@@ -365,6 +407,9 @@ public class TodoViewModel : ViewModelBase
     private static bool IsFutureDate(string date, string todayKey)
         => string.CompareOrdinal(date, todayKey) > 0;
 
+    private static bool IsTomorrowOpenTask(TodoItem item)
+        => !item.IsCompleted && item.PlannedForDate == TomorrowKey();
+
     private void WatchItem(TodoItemViewModel item)
     {
         item.PropertyChanged -= OnItemPropertyChanged;
@@ -398,6 +443,13 @@ public class TodoViewModel : ViewModelBase
         OnPropertyChanged(nameof(PlannedFocusBlocks));
         OnPropertyChanged(nameof(PlanSummaryText));
         OnPropertyChanged(nameof(TopTaskPromptText));
+    }
+
+    private void NotifyTomorrowProperties()
+    {
+        OnPropertyChanged(nameof(TomorrowTasksCount));
+        OnPropertyChanged(nameof(TomorrowFocusBlocks));
+        OnPropertyChanged(nameof(TomorrowPlanText));
     }
 
     private void NotifyReviewProperties()

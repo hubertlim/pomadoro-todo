@@ -9,9 +9,10 @@
 ## Changes
 
 - Reworked the color system around neutral charcoal surfaces, teal focus accents, green rest states, amber medium priority, and red high priority.
-- Added reusable `PanelCard` and `ProgressBar` styles in `Theme.xaml` so dashboard and timer sections share the same component language.
+- Added reusable `PanelCard`, `ProgressBar`, `CheckBox`, `ComboBox`, and `ScrollBar` styles in `Theme.xaml` so controls share the same component language.
 - Replaced corrupted glyph labels with ASCII-safe labels to keep the app professional on systems with different fonts or encodings.
 - Updated active task styling from a pulsing blur to a soft accent background and border.
+- Replaced the native checkbox with a compact themed checkbox that matches the app's input surfaces and accent states.
 - Kept lightweight entrance animation for new task rows and a single timer arc color animation. These are low-cost compared with per-row blur effects.
 - Cached priority brushes in the converter and froze them, avoiding repeated brush allocation during binding refreshes.
 

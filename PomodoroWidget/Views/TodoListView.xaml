@@ -216,19 +216,9 @@
                                             CommandParameter="{Binding}"/>
 
                                     <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" Margin="0,4,0,0">
-                                        <TextBlock Text="{Binding PomodoroCount, StringFormat={}P{0}}"
+                                        <TextBlock Text="{Binding FocusProgressText}"
                                                    Foreground="{StaticResource TextSecondaryBrush}"
-                                                   FontSize="10" Margin="0,0,6,0">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding PomodoroCount}" Value="0">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
+                                                   FontSize="10" Margin="0,0,6,0"/>
                                         <TextBlock Text="{Binding StatusText}"
                                                    Foreground="{StaticResource TextSecondaryBrush}"
                                                    FontSize="10"/>

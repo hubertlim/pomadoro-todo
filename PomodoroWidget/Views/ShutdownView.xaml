@@ -41,8 +41,12 @@
                     <Border Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource PanelCard}" Padding="10">
                         <StackPanel>
                             <TextBlock Text="Tomorrow" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
-                            <TextBlock Text="{Binding Todo.PlanSummaryText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                            <TextBlock Text="{Binding Analytics.RolloverText}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,4,0,0"/>
+                            <TextBlock Text="{Binding Todo.TomorrowPlanText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                            <TextBlock Text="Leave open tasks in today to review them in the morning."
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="11"
+                                       TextWrapping="Wrap"
+                                       Margin="0,4,0,0"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -63,8 +67,48 @@
                             Style="{StaticResource WidgetButton}"
                             Padding="14,7"
                             Margin="0,0,6,6"/>
+                    <Button Content="Move open to tomorrow"
+                            Command="{Binding MoveOpenTasksToTomorrowCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="14,7"
+                            Margin="0,0,6,6"/>
                     <Button Content="Backup"
                             Command="{Binding CreateBackupCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="14,7"
+                            Margin="0,0,6,6"/>
+                    <Button Content="Save now"
+                            Command="{Binding SaveNowCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="14,7"
+                            Margin="0,0,6,6"/>
+                    <Button Content="Export"
+                            Command="{Binding ExportDataCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="14,7"
+                            Margin="0,0,6,6"/>
+                    <Button Content="Import"
+                            Command="{Binding ImportDataCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="14,7"
+                            Margin="0,0,6,6"/>
+                    <Button Content="Restore latest"
+                            Command="{Binding RestoreLatestBackupCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="14,7"
+                            Margin="0,0,6,6"/>
+                    <Button Content="Tasks CSV"
+                            Command="{Binding ExportTasksCsvCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="14,7"
+                            Margin="0,0,6,6"/>
+                    <Button Content="Daily report"
+                            Command="{Binding ExportDailyReportCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="14,7"
+                            Margin="0,0,6,6"/>
+                    <Button Content="Open folder"
+                            Command="{Binding OpenDataFolderCommand}"
                             Style="{StaticResource WidgetButton}"
                             Padding="14,7"
                             Margin="0,0,6,6"/>
@@ -75,6 +119,59 @@
                            FontSize="11"
                            TextWrapping="Wrap"
                            Margin="0,6,0,0"/>
+
+                <Border Style="{StaticResource PanelCard}" Padding="10" Margin="0,10,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Data status"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"/>
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="86"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Health" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding DataStatus.HealthText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="10"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Version" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" Margin="0,4,0,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DataStatus.DataVersion}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="10" Margin="0,4,0,0"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Last save" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" Margin="0,4,0,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DataStatus.LastSavedText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="10" Margin="0,4,0,0"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Save size" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" Margin="0,4,0,0"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DataStatus.DataFileSizeText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="10" Margin="0,4,0,0"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Backups" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" Margin="0,4,0,0"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DataStatus.BackupCount}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="10" Margin="0,4,0,0"/>
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="Latest" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" Margin="0,4,0,0"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding DataStatus.LatestBackupText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="10" TextWrapping="Wrap" Margin="0,4,0,0"/>
+
+                            <TextBlock Grid.Row="6" Grid.Column="0" Text="Backup size" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" Margin="0,4,0,0"/>
+                            <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding DataStatus.LatestBackupSizeText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="10" Margin="0,4,0,0"/>
+
+                            <TextBlock Grid.Row="7" Grid.Column="0" Text="Save file" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" Margin="0,4,0,0"/>
+                            <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding DataStatus.DataFilePath}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="10" TextWrapping="Wrap" Margin="0,4,0,0"/>
+
+                            <TextBlock Grid.Row="8" Grid.Column="0" Text="Backup dir" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" Margin="0,4,0,0"/>
+                            <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding DataStatus.BackupDirectoryPath}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="10" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </Border>
     </Grid>
