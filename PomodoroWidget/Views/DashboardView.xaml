@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:PomodoroWidget.ViewModels">
 
-    <ScrollViewer Margin="14,8,14,14" VerticalScrollBarVisibility="Auto">
+    <ScrollViewer Margin="10,4,10,10" VerticalScrollBarVisibility="Auto">
         <StackPanel>
             <Border Style="{StaticResource PanelCard}" Margin="0,0,0,8">
                 <StackPanel>

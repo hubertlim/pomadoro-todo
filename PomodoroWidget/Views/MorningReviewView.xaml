@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:PomodoroWidget.ViewModels">
 
-    <Grid Margin="14,8,14,14">
+    <Grid Margin="10,4,10,10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -85,18 +85,34 @@
             </ItemsControl>
         </ScrollViewer>
 
-        <WrapPanel Grid.Row="2" Margin="0,8,0,0" HorizontalAlignment="Right">
-            <Button Content="Keep all today"
-                    Command="{Binding KeepAllReviewTasksCommand}"
-                    Style="{StaticResource AccentButton}"
+        <Grid Grid.Row="2" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Content="{Binding UndoRemovalText}"
+                    Command="{Binding UndoRemovalCommand}"
+                    Style="{StaticResource WidgetButton}"
+                    Foreground="{StaticResource TextSecondaryBrush}"
                     FontSize="11"
                     Padding="10,6"
-                    Margin="0,0,6,0"/>
-            <Button Content="Defer all"
-                    Command="{Binding DeferAllReviewTasksCommand}"
-                    Style="{StaticResource WidgetButton}"
-                    FontSize="11"
-                    Padding="10,6"/>
-        </WrapPanel>
+                    HorizontalAlignment="Left"
+                    Visibility="{Binding HasUndoRemoval, Converter={StaticResource BoolToVis}}"/>
+
+            <WrapPanel Grid.Column="1" HorizontalAlignment="Right">
+                <Button Content="Keep all today"
+                        Command="{Binding KeepAllReviewTasksCommand}"
+                        Style="{StaticResource AccentButton}"
+                        FontSize="11"
+                        Padding="10,6"
+                        Margin="0,0,6,0"/>
+                <Button Content="Defer all"
+                        Command="{Binding DeferAllReviewTasksCommand}"
+                        Style="{StaticResource WidgetButton}"
+                        FontSize="11"
+                        Padding="10,6"/>
+            </WrapPanel>
+        </Grid>
     </Grid>
 </UserControl>

@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:PomodoroWidget.ViewModels">
 
-    <Grid Margin="14,8,14,14">
+    <Grid Margin="10,4,10,10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -166,6 +166,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
                                     <Ellipse Grid.RowSpan="2" Grid.Column="0" Width="8" Height="8" Margin="0,4,8,0"
@@ -209,7 +210,14 @@
                                             Command="{Binding DataContext.LinkToTimerCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}"/>
 
-                                    <Button Grid.Column="4" Content="Del" FontSize="11" Padding="7,3" Margin="5,0,0,0"
+                                    <Button Grid.Column="4" Content="Tmrw" FontSize="11" Padding="7,3" Margin="5,0,0,0"
+                                            Style="{StaticResource WidgetButton}" Opacity="0.78"
+                                            ToolTip="Move to tomorrow"
+                                            Visibility="{Binding IsCompleted, Converter={StaticResource InverseBoolToVis}}"
+                                            Command="{Binding DataContext.MoveTaskToTomorrowCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"/>
+
+                                    <Button Grid.Column="5" Content="Del" FontSize="11" Padding="7,3" Margin="5,0,0,0"
                                             Style="{StaticResource WidgetButton}" Opacity="0.58"
                                             ToolTip="Delete"
                                             Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
@@ -224,7 +232,7 @@
                                                    FontSize="10"/>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2"
+                                    <StackPanel Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="3"
                                                 Orientation="Horizontal"
                                                 HorizontalAlignment="Right"
                                                 Margin="8,4,0,0">
@@ -261,10 +269,26 @@
             </StackPanel>
         </ScrollViewer>
 
-        <Button Grid.Row="3" Content="Clear completed"
-                Command="{Binding ClearCompletedCommand}"
-                Style="{StaticResource WidgetButton}"
-                Foreground="{StaticResource TextSecondaryBrush}"
-                FontSize="11" HorizontalAlignment="Right" Margin="0,8,0,0"/>
+        <Grid Grid.Row="3" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Content="{Binding UndoRemovalText}"
+                    Command="{Binding UndoRemovalCommand}"
+                    Style="{StaticResource WidgetButton}"
+                    Foreground="{StaticResource TextSecondaryBrush}"
+                    FontSize="11"
+                    HorizontalAlignment="Left"
+                    Visibility="{Binding HasUndoRemoval, Converter={StaticResource BoolToVis}}"/>
+
+            <Button Grid.Column="1" Content="Clear completed"
+                    Command="{Binding ClearCompletedCommand}"
+                    Style="{StaticResource WidgetButton}"
+                    Foreground="{StaticResource TextSecondaryBrush}"
+                    FontSize="11"
+                    HorizontalAlignment="Right"/>
+        </Grid>
     </Grid>
 </UserControl>

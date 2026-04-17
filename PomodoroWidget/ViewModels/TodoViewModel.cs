@@ -11,6 +11,7 @@ public class TodoViewModel : ViewModelBase
     public ObservableCollection<TodoItemViewModel> Todos { get; } = [];
     public ObservableCollection<TodoItemViewModel> ReviewTasks { get; } = [];
     private readonly List<TodoItem> _archive = [];
+    private readonly List<RemovedTask> _lastRemovedTasks = [];
     private string _todayKey = TodayKey();
 
     public bool HasReviewTasks => ReviewTasks.Count > 0;
@@ -50,6 +51,20 @@ public class TodoViewModel : ViewModelBase
     public string TopTaskPromptText => OpenTasksCount == 1
         ? "Choose the first focus task and start with a clean win."
         : "Choose the task that makes today a win, then enter Focus mode.";
+    public bool HasUndoRemoval => _lastRemovedTasks.Count > 0;
+    public string UndoRemovalText
+    {
+        get
+        {
+            if (_lastRemovedTasks.Count == 0) return "Nothing to undo";
+            if (_lastRemovedTasks.Any(task => task.Action == UndoTaskAction.MoveToTomorrow))
+                return _lastRemovedTasks.Count == 1 ? "Undo moved task" : $"Undo {_lastRemovedTasks.Count} moved tasks";
+
+            return _lastRemovedTasks.Count == 1
+                ? "Undo removed task"
+                : $"Undo {_lastRemovedTasks.Count} removed tasks";
+        }
+    }
 
     private string _newTaskText = string.Empty;
     public string NewTaskText
@@ -99,6 +114,8 @@ public class TodoViewModel : ViewModelBase
     public ICommand KeepAllReviewTasksCommand { get; }
     public ICommand DeferAllReviewTasksCommand { get; }
     public ICommand SelectFirstOpenTaskCommand { get; }
+    public ICommand UndoRemovalCommand { get; }
+    public ICommand MoveTaskToTomorrowCommand { get; }
 
     public event Action? Changed;
     public event Action<TodoItemViewModel>? TaskAdded;
@@ -129,6 +146,8 @@ public class TodoViewModel : ViewModelBase
         KeepAllReviewTasksCommand = new RelayCommand(_ => KeepAllReviewTasks());
         DeferAllReviewTasksCommand = new RelayCommand(_ => DeferAllReviewTasks());
         SelectFirstOpenTaskCommand = new RelayCommand(_ => { LinkFirstOpenTask(); NotifyPlanProperties(); NotifyChanged(); });
+        UndoRemovalCommand = new RelayCommand(_ => UndoLastRemoval());
+        MoveTaskToTomorrowCommand = new RelayCommand(p => MoveTaskToTomorrow(p as TodoItemViewModel));
     }
 
     private void AddTask()
@@ -153,6 +172,7 @@ public class TodoViewModel : ViewModelBase
     {
         if (item == null) return;
         if (LinkedTask == item) LinkedTask = null;
+        RememberRemoved(item.Model, UndoTaskAction.RemoveFromPlan);
         item.PropertyChanged -= OnItemPropertyChanged;
         Todos.Remove(item);
         NotifyChanged();
@@ -226,6 +246,7 @@ public class TodoViewModel : ViewModelBase
     {
         _todayKey = todayKey;
         _archive.Clear();
+        _lastRemovedTasks.Clear();
         Todos.Clear();
         ReviewTasks.Clear();
         var carriedOver = 0;
@@ -263,6 +284,7 @@ public class TodoViewModel : ViewModelBase
         }
 
         NotifyTomorrowProperties();
+        NotifyUndoProperties();
         NotifyChanged();
         return carriedOver;
     }
@@ -313,6 +335,10 @@ public class TodoViewModel : ViewModelBase
     public int MoveOpenTasksToTomorrow()
     {
         var openTasks = Todos.Where(t => !t.IsCompleted).ToList();
+        if (openTasks.Count == 0)
+            return 0;
+
+        RememberMoved(openTasks.Select(task => task.Model));
         foreach (var item in openTasks)
         {
             if (LinkedTask == item)
@@ -324,13 +350,26 @@ public class TodoViewModel : ViewModelBase
             _archive.Add(item.Model);
         }
 
-        if (openTasks.Count == 0)
-            return 0;
-
         NotifyPlanProperties();
         NotifyTomorrowProperties();
         NotifyChanged();
         return openTasks.Count;
+    }
+
+    private void MoveTaskToTomorrow(TodoItemViewModel? item)
+    {
+        if (item == null || item.IsCompleted) return;
+        if (LinkedTask == item) LinkedTask = null;
+
+        RememberMoved(new[] { item.Model });
+        item.PlannedForDate = TomorrowKey();
+        item.PropertyChanged -= OnItemPropertyChanged;
+        Todos.Remove(item);
+        _archive.Add(item.Model);
+
+        NotifyPlanProperties();
+        NotifyTomorrowProperties();
+        NotifyChanged();
     }
 
     private void KeepReviewTask(TodoItemViewModel? item)
@@ -360,6 +399,7 @@ public class TodoViewModel : ViewModelBase
     {
         if (item == null) return;
         item.PropertyChanged -= OnItemPropertyChanged;
+        RememberRemoved(item.Model, UndoTaskAction.DropFromReview);
         ReviewTasks.Remove(item);
         NotifyReviewProperties();
         NotifyChanged();
@@ -375,6 +415,54 @@ public class TodoViewModel : ViewModelBase
     {
         foreach (var item in ReviewTasks.ToList())
             DeferReviewTask(item);
+    }
+
+    private void UndoLastRemoval()
+    {
+        if (_lastRemovedTasks.Count == 0) return;
+
+        foreach (var removed in _lastRemovedTasks.AsEnumerable().Reverse())
+        {
+            var vm = new TodoItemViewModel(removed.Item);
+            WatchItem(vm);
+
+            if (removed.Action == UndoTaskAction.MoveToTomorrow)
+            {
+                _archive.Remove(removed.Item);
+                removed.Item.PlannedForDate = _todayKey;
+                Todos.Insert(0, vm);
+            }
+            else if (removed.Action == UndoTaskAction.DropFromReview && !removed.Item.IsCompleted)
+            {
+                ReviewTasks.Insert(0, vm);
+            }
+            else
+            {
+                Todos.Insert(0, vm);
+            }
+        }
+
+        _lastRemovedTasks.Clear();
+        NotifyUndoProperties();
+        NotifyPlanProperties();
+        NotifyTomorrowProperties();
+        NotifyReviewProperties();
+        NotifyChanged();
+    }
+
+    private void RememberRemoved(TodoItem item, UndoTaskAction action)
+    {
+        _lastRemovedTasks.Clear();
+        _lastRemovedTasks.Add(new RemovedTask(item, action));
+        NotifyUndoProperties();
+    }
+
+    private void RememberMoved(IEnumerable<TodoItem> items)
+    {
+        _lastRemovedTasks.Clear();
+        foreach (var item in items)
+            _lastRemovedTasks.Add(new RemovedTask(item, UndoTaskAction.MoveToTomorrow));
+        NotifyUndoProperties();
     }
 
     private bool ShouldShow(TodoItem item)
@@ -457,5 +545,20 @@ public class TodoViewModel : ViewModelBase
         OnPropertyChanged(nameof(HasReviewTasks));
         OnPropertyChanged(nameof(ReviewTasksCount));
         OnPropertyChanged(nameof(ReviewSummaryText));
+    }
+
+    private void NotifyUndoProperties()
+    {
+        OnPropertyChanged(nameof(HasUndoRemoval));
+        OnPropertyChanged(nameof(UndoRemovalText));
+    }
+
+    private sealed record RemovedTask(TodoItem Item, UndoTaskAction Action);
+
+    private enum UndoTaskAction
+    {
+        RemoveFromPlan,
+        DropFromReview,
+        MoveToTomorrow
     }
 }

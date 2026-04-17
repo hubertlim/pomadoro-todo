@@ -4,8 +4,8 @@
         xmlns:vm="clr-namespace:PomodoroWidget.ViewModels"
         xmlns:views="clr-namespace:PomodoroWidget.Views"
         Title="Pomodoro Widget"
-        Width="380" Height="660"
-        MinWidth="320" MinHeight="240"
+        Width="320" Height="520"
+        MinWidth="292" MinHeight="360"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -17,7 +17,7 @@
         <vm:MainViewModel/>
     </Window.DataContext>
 
-    <Border Background="{StaticResource BgPrimaryBrush}"
+    <Border Background="{StaticResource ConsoleShellBrush}"
             CornerRadius="8"
             BorderBrush="{StaticResource WidgetBorderBrush}" BorderThickness="1"
             Margin="8">
@@ -48,80 +48,121 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0" Background="Transparent"
                     MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"
-                    Padding="12,8">
+                    Padding="10,9,10,6">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Pomodoro"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
-                                   FontSize="13" FontWeight="SemiBold"/>
-                        <TextBlock Text="{Binding WorkflowNudgeText}"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   FontSize="10"
-                                   TextTrimming="CharacterEllipsis"
-                                   Margin="0,1,8,0"/>
-                    </StackPanel>
+                    <Border Style="{StaticResource ConsolePanel}" Padding="9,7">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="58"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Ellipse Width="7" Height="7"
+                                     Fill="{StaticResource ConsoleLineBrush}"
+                                     VerticalAlignment="Top"
+                                     Margin="0,4,8,0"/>
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="POMODORO OS"
+                                           Foreground="{StaticResource ConsoleLineBrush}"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding WorkflowNudgeText}"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="10"
+                                           TextTrimming="CharacterEllipsis"
+                                           Margin="0,1,6,0"/>
+                            </StackPanel>
+
+                            <Canvas Grid.Column="2"
+                                    Width="52"
+                                    Height="22"
+                                    VerticalAlignment="Center"
+                                    ClipToBounds="True">
+                                <Path Stroke="{StaticResource ConsoleLineBrush}"
+                                      StrokeThickness="1.4"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      Opacity="0.72"
+                                      Data="M 0 11 L 6 11 L 9 5 L 13 17 L 17 8 L 21 14 L 26 11 L 31 11 L 35 6 L 39 16 L 43 10 L 48 11">
+                                    <Path.Triggers>
+                                        <EventTrigger RoutedEvent="Loaded">
+                                            <BeginStoryboard>
+                                                <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                     From="0.35" To="0.95" Duration="0:0:1.1"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Path.Triggers>
+                                </Path>
+                            </Canvas>
+                        </Grid>
+                    </Border>
 
                     <Button Grid.Column="1"
-                            Command="{Binding ShowPlanCommand}"
                             Style="{StaticResource WidgetButton}"
-                            Height="28" Padding="7,0"
-                            FontSize="11" ToolTip="Plan today">
-                        <TextBlock Text="Plan"/>
-                    </Button>
-
-                    <Button Grid.Column="2"
-                            Command="{Binding BeginFocusCommand}"
-                            Style="{StaticResource WidgetButton}"
-                            Height="28" Padding="7,0"
-                            FontSize="11" ToolTip="Focus current task">
-                        <TextBlock Text="Focus"/>
-                    </Button>
-
-                    <Button Grid.Column="3"
-                            Command="{Binding ToggleDashboardCommand}"
-                            Style="{StaticResource WidgetButton}"
-                            Height="28" Padding="7,0"
-                            FontSize="11" ToolTip="Progress dashboard">
-                        <TextBlock Text="Stats"/>
-                    </Button>
-
-                    <Button Grid.Column="4"
-                            Command="{Binding BeginShutdownCommand}"
-                            Style="{StaticResource WidgetButton}"
-                            Height="28" Padding="7,0"
-                            FontSize="11" ToolTip="Shutdown today">
-                        <TextBlock Text="End"/>
-                    </Button>
-
-                    <Button Grid.Column="5"
-                            Style="{StaticResource WidgetButton}"
-                            Width="28" Height="28" Padding="0"
+                            Width="26" Height="26" Padding="0"
+                            Margin="7,0,0,0"
                             Click="CloseButton_Click" ToolTip="Close">
-                        <TextBlock Text="x" FontSize="12" Opacity="0.6"/>
+                        <TextBlock Text="x" FontSize="11" Opacity="0.62"/>
                     </Button>
                 </Grid>
             </Border>
 
-            <Border Grid.Row="0" BorderBrush="#10FFFFFF" BorderThickness="0,0,0,1"
-                    VerticalAlignment="Bottom"/>
-
             <views:TimerView Grid.Row="1" DataContext="{Binding Timer}"/>
 
-            <Grid Grid.Row="2"
+            <Border Grid.Row="2"
+                    Style="{StaticResource ConsolePanel}"
+                    Padding="7"
+                    Margin="10,0,10,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            Content="Plan"
+                            Command="{Binding ShowPlanCommand}"
+                            Style="{StaticResource ModeButton}"
+                            Margin="0,0,4,0"
+                            ToolTip="Plan today"/>
+                    <Button Grid.Column="1"
+                            Content="Focus"
+                            Command="{Binding BeginFocusCommand}"
+                            Style="{StaticResource ModeButton}"
+                            Margin="0,0,4,0"
+                            ToolTip="Focus current task"/>
+                    <Button Grid.Column="2"
+                            Content="Stats"
+                            Command="{Binding ToggleDashboardCommand}"
+                            Style="{StaticResource ModeButton}"
+                            Margin="0,0,4,0"
+                            ToolTip="Progress dashboard"/>
+                    <Button Grid.Column="3"
+                            Content="End"
+                            Command="{Binding BeginShutdownCommand}"
+                            Style="{StaticResource ModeButton}"
+                            ToolTip="Shutdown today"/>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="3"
                   Visibility="{Binding DataContext.IsExpanded, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}">
                 <views:MorningReviewView DataContext="{Binding Todo}"
                                          Visibility="{Binding DataContext.IsReviewVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}"/>

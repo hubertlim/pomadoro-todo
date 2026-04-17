@@ -21,3 +21,4 @@
 - Keep the widget calm and fast: one accent color, small motion, and clear hierarchy.
 - Use progress surfaces for motivation, not decoration.
 - Prefer reusable styles before adding one-off colors or borders in individual views.
+- Move toward the Compact AI Console direction: black-glass status screen, small control deck, compact timer readout, and progressive disclosure for rare tools.

@@ -13,6 +13,9 @@
     <Color x:Key="Success">#22C55E</Color>
     <Color x:Key="Warning">#F59E0B</Color>
     <Color x:Key="Danger">#EF4444</Color>
+    <Color x:Key="ConsoleShell">#E0151B22</Color>
+    <Color x:Key="ConsoleScreen">#F8060B0D</Color>
+    <Color x:Key="ConsoleLine">#2DD4BF</Color>
 
     <SolidColorBrush x:Key="BgPrimaryBrush" Color="{StaticResource BgPrimary}"/>
     <SolidColorBrush x:Key="BgSecondaryBrush" Color="{StaticResource BgSecondary}"/>
@@ -25,8 +28,12 @@
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource Success}"/>
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource Warning}"/>
     <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource Danger}"/>
+    <SolidColorBrush x:Key="ConsoleShellBrush" Color="{StaticResource ConsoleShell}"/>
+    <SolidColorBrush x:Key="ConsoleScreenBrush" Color="{StaticResource ConsoleScreen}"/>
+    <SolidColorBrush x:Key="ConsoleLineBrush" Color="{StaticResource ConsoleLine}"/>
     <SolidColorBrush x:Key="WidgetBorderBrush" Color="#1FFFFFFF"/>
     <SolidColorBrush x:Key="HairlineBrush" Color="#14FFFFFF"/>
+    <SolidColorBrush x:Key="ScreenHairlineBrush" Color="#332DD4BF"/>
 
     <Style x:Key="PanelCard" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource BgSecondaryBrush}"/>
@@ -34,6 +41,14 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="Padding" Value="12"/>
+    </Style>
+
+    <Style x:Key="ConsolePanel" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource ConsoleScreenBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ScreenHairlineBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="10"/>
     </Style>
 
     <Style TargetType="ProgressBar">
@@ -346,6 +361,12 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style x:Key="ModeButton" TargetType="Button" BasedOn="{StaticResource WidgetButton}">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Padding" Value="8,5"/>
+        <Setter Property="MinWidth" Value="44"/>
     </Style>
 
     <!-- TextBox style with placeholder -->

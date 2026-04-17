@@ -31,6 +31,8 @@ Build the core loop first:
 - Added per-task focus progress, shown in the task list and Focus mode.
 - Added weekly dashboard insight metrics for consistency, average focus, best day, and a short next-step nudge.
 - Replaced the static header subtitle with a workflow-aware nudge that changes during review, planning, focus, stats, and shutdown.
+- Added a one-step undo for removed tasks from the plan and morning review surfaces.
+- Added a per-task "Tmrw" action so the user can right-size today's plan without waiting for shutdown.
 
 ## Next Step
 

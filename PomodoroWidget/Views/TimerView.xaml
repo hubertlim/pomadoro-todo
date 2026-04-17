@@ -2,60 +2,82 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <StackPanel Margin="18,14,18,12">
-        <Grid Width="150" Height="150" HorizontalAlignment="Center">
-            <Ellipse Stroke="#16FFFFFF" StrokeThickness="7" Width="126" Height="126"/>
+    <Border Style="{StaticResource ConsolePanel}" Margin="10,2,10,8" Padding="10">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="112"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-            <Path StrokeThickness="7"
-                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                  Width="126" Height="126">
-                <Path.Stroke>
-                    <SolidColorBrush x:Name="ArcBrush" Color="#9BA3AF"/>
-                </Path.Stroke>
-                <Path.Data>
-                    <Binding Path="ArcEndAngle" Converter="{StaticResource AngleToArc}"/>
-                </Path.Data>
-            </Path>
+            <Grid Width="112" Height="112" HorizontalAlignment="Left">
+                <Ellipse Stroke="#16FFFFFF" StrokeThickness="6" Width="94" Height="94"/>
 
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <TextBlock Text="{Binding RemainingText}"
-                           Foreground="{StaticResource TextPrimaryBrush}"
-                           FontSize="30" FontWeight="SemiBold"
-                           HorizontalAlignment="Center"/>
-                <TextBlock Text="{Binding PhaseText}"
-                           FontSize="11" FontWeight="SemiBold"
-                           Foreground="{Binding PhaseColor}"
-                           HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                <Viewbox Width="94" Height="94">
+                    <Path StrokeThickness="7"
+                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                          Width="126" Height="126">
+                        <Path.Stroke>
+                            <SolidColorBrush x:Name="ArcBrush" Color="#9BA3AF"/>
+                        </Path.Stroke>
+                        <Path.Data>
+                            <Binding Path="ArcEndAngle" Converter="{StaticResource AngleToArc}"/>
+                        </Path.Data>
+                    </Path>
+                </Viewbox>
+
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding RemainingText}"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               FontSize="24" FontWeight="SemiBold"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding PhaseText}"
+                               FontSize="10" FontWeight="SemiBold"
+                               Foreground="{Binding PhaseColor}"
+                               HorizontalAlignment="Center" Margin="0,1,0,0"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0">
+                <TextBlock Text="{Binding SessionText, StringFormat='Session {0}'}"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           FontSize="11" Margin="0,0,0,8"/>
+
+                <WrapPanel>
+                    <Button Command="{Binding StartCommand}"
+                            Style="{StaticResource AccentButton}"
+                            Visibility="{Binding IsRunning, Converter={StaticResource InverseBoolToVis}}"
+                            Margin="0,0,5,5" Padding="12,6"
+                            FontSize="12">
+                        <TextBlock Text="Start"/>
+                    </Button>
+                    <Button Command="{Binding PauseCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}"
+                            Margin="0,0,5,5" Padding="12,6"
+                            FontSize="12">
+                        <TextBlock Text="Pause"/>
+                    </Button>
+                    <Button Command="{Binding ResetCommand}"
+                            Style="{StaticResource WidgetButton}"
+                            Padding="12,6"
+                            FontSize="12">
+                        <TextBlock Text="Reset"/>
+                    </Button>
+                </WrapPanel>
             </StackPanel>
-        </Grid>
 
-        <TextBlock Text="{Binding SessionText, StringFormat='Session {0}'}"
-                   Foreground="{StaticResource TextSecondaryBrush}"
-                   FontSize="12" HorizontalAlignment="Center" Margin="0,8,0,0"/>
-
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-            <Button Command="{Binding StartCommand}"
-                    Style="{StaticResource AccentButton}"
-                    Visibility="{Binding IsRunning, Converter={StaticResource InverseBoolToVis}}"
-                    Margin="0,0,6,0" Padding="16,7">
-                <TextBlock Text="Start"/>
-            </Button>
-            <Button Command="{Binding PauseCommand}"
-                    Style="{StaticResource WidgetButton}"
-                    Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}"
-                    Margin="0,0,6,0" Padding="16,7">
-                <TextBlock Text="Pause"/>
-            </Button>
-            <Button Command="{Binding ResetCommand}"
-                    Style="{StaticResource WidgetButton}" Padding="16,7">
-                <TextBlock Text="Reset"/>
-            </Button>
-        </StackPanel>
-
-        <Border Style="{StaticResource PanelCard}"
-                Visibility="{Binding IsIdle, Converter={StaticResource BoolToVis}}"
-                Padding="10" Margin="0,12,0,0">
-            <Grid>
+            <Border Grid.Row="1" Grid.ColumnSpan="2"
+                    Background="{StaticResource BgInputBrush}"
+                    BorderBrush="{StaticResource HairlineBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Visibility="{Binding IsIdle, Converter={StaticResource BoolToVis}}"
+                    Padding="8" Margin="0,8,0,0">
+                <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -87,7 +109,8 @@
                            FontSize="10" HorizontalAlignment="Center"/>
                 <TextBlock Grid.Row="2" Grid.Column="2" Text="min" Foreground="{StaticResource TextSecondaryBrush}"
                            FontSize="10" HorizontalAlignment="Center"/>
-            </Grid>
-        </Border>
-    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
 </UserControl>

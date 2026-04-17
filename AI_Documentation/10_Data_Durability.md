@@ -24,6 +24,7 @@ No local services or applications are installed for this step. The app continues
 - Added `Save now` and `Open folder` actions to the Shutdown data tools.
 - Expanded Data Status with health, save size, latest backup size, and backup directory.
 - `Move open to tomorrow` saves immediately after shifting the active open list into the next day's plan.
+- Added a short-lived undo path for accidental task removal or task moves before relying on backup restore.
 
 ## Why This Comes Before SQLite
 
